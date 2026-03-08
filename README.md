@@ -51,3 +51,32 @@ Open your web browser and navigate to `http://localhost:5000` to access the appl
 
 ### 8. Test DB Connection
 You can test the database connection by navigating to `http://localhost:5000/test_db` in your web browser. This route will attempt to connect to the MySQL database and return a success message if the connection is successful.
+
+## Team Workflow
+
+### Working on Features
+
+1. **Always pull latest changes before starting work:**
+   ```bash
+   git pull origin main
+   ```
+
+2. **Create a new branch for your feature:**
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+3. **Make your changes and test them**
+
+4. **Commit with clear messages:**
+   ```bash
+   git add .
+   git commit -m "Add workout builder form component"
+   ```
+
+5. **Push your branch:**
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+6. **Create a Pull Request** for team review
