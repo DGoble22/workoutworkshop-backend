@@ -5,12 +5,18 @@ from routes.admin_routes import admin_bp
 from routes.auth_routes import auth_bp
 from routes.coach_routes import coach_bp
 from routes.user_routes import user_bp
+from dotenv import load_dotenv
+import os
 app = Flask(__name__)
 CORS(app)
 
-#DB Config
-# Replace 'root', 'password', and 'fitness_db' with your actual MySQL info
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/GroupProject'
+# DB Config
+db_user = os.getenv('DB_USER')
+db_password = os.getenv('DB_PASSWORD')
+db_host = os.getenv('DB_HOST')
+db_name = os.getenv('DB_NAME')
+
+app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}'
 
 db = SQLAlchemy(app)
 

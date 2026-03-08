@@ -41,6 +41,13 @@ pip install -r requirements.txt
 ### 5. Configure Database
 Make sure MySQL is running and create a database named `Group_Project`. Update the database URI in `app.py` if necessary.
 If you don't have the DB running you need to first run the create tables script and all of the mock data scripts within DBeaver or MYSQLWorkbench
+Create a .env file in the root directory of the project and add the following line, replacing the values with your MySQL credentials:
+```
+DB_USER=root
+DB_PASSWORD=
+DB_HOST=localhost
+DB_NAME=GroupProject
+```
 
 ### 6. Run the Application
 ```bash
@@ -50,7 +57,7 @@ python app.py
 Open your web browser and navigate to `http://localhost:5000` to access the application.
 
 ### 8. Test DB Connection
-You can test the database connection by navigating to `http://localhost:5000/test_db` in your web browser. This route will attempt to connect to the MySQL database and return a success message if the connection is successful.
+You can test the database connection by navigating to `http://localhost:5000/test-db` in your web browser. This route will attempt to connect to the MySQL database and return a success message if the connection is successful.
 
 ## Team Workflow
 
