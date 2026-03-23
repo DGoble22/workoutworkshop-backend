@@ -1,11 +1,11 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
 from routes.admin_routes import admin_bp
 from routes.auth_routes import auth_bp
 from routes.coach_routes import coach_bp
 from routes.user_routes import user_bp
 from dotenv import load_dotenv
-from extensions import db
 import os
 
 load_dotenv()
@@ -22,7 +22,7 @@ db_name = os.getenv('DB_NAME')
 app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}'
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'change-me-in-production')
 
-db.init_app(app)
+db = SQLAlchemy(app)
 
 app.register_blueprint(admin_bp)
 app.register_blueprint(auth_bp)

@@ -1,5 +1,7 @@
-from flask import Blueprint, jsonify, request
-from extensions import db
+from flask import Blueprint, jsonify, request, current_app
+
+# from flask_sqlalchemy import SQLAlchemy
+# db = SQLAlchemy()
 
 admin_bp = Blueprint('admin_bp', __name__)
 
@@ -14,7 +16,7 @@ def admin_test():
 
 @admin_bp.route('/admin/coach-applications', methods=['GET'])
 def coach_applications(): # Get the information on Coach Applications
-    
+    db = current_app.extensions['sqlalchemy']
     try:
         query = """
                 SELECT cp.coach_id, CONCAT(up.first_name, ' ', up.last_name) AS display_name, cc.certification_id, cc.status
@@ -42,7 +44,7 @@ def coach_applications(): # Get the information on Coach Applications
 
 @admin_bp.route('/admin/coach-applications/<int:coach_id>', methods=['GET'])
 def coach_application_details(coach_id): # Get the information for one Coach Application
-    
+    db = current_app.extensions['sqlalchemy']
     try:
         query = """
                 SELECT CONCAT(up.first_name, ' ', up.last_name) AS display_name, cp.pricing, cp.bio, cc.file_url, cc.certification_id
@@ -70,7 +72,7 @@ def coach_application_details(coach_id): # Get the information for one Coach App
 
 @admin_bp.route('/admin/coach-applications/<int:certification_id>/approve', methods=['PUT'])
 def approve_certification(certification_id): # Update the Certification as Approved
-    
+    db = current_app.extensions['sqlalchemy']
     data = request.get_json()
     admin_id = data.get("user_id")
     
@@ -101,7 +103,7 @@ def approve_certification(certification_id): # Update the Certification as Appro
 
 @admin_bp.route('/admin/coach-applications/<int:certification_id>/reject', methods=['PUT'])
 def reject_certification(certification_id): # Update the Certification as Rejected
-    
+    db = current_app.extensions['sqlalchemy']
     data = request.get_json()
     admin_id = data.get("admin_id")
     
@@ -134,7 +136,7 @@ def reject_certification(certification_id): # Update the Certification as Reject
 
 @admin_bp.route('/admin/coach-reports', methods=['GET'])
 def coach_reports(): # Get the information on Coach Reports
-    
+    db = current_app.extensions['sqlalchemy']
     try:
         query = """
                 SELECT cr.report_id, cp.coach_id, CONCAT(up.first_name, ' ', up.last_name) AS display_name, cr.reason, cr.status
@@ -163,7 +165,7 @@ def coach_reports(): # Get the information on Coach Reports
 
 @admin_bp.route('/admin/coach-reports/<int:report_id>', methods=['GET'])
 def coach_report_details(report_id): # Get the information for one Coach Report
-    
+    db = current_app.extensions['sqlalchemy']
     try:
         query = """
                 SELECT cr.report_id, cr.reason, cr.status, cp.coach_id, cp.pricing, cp.is_active, cp.is_nutritionist, cp.bio,
@@ -200,7 +202,7 @@ def coach_report_details(report_id): # Get the information for one Coach Report
 
 @admin_bp.route('/admin/coach-reports/<int:report_id>/dismiss', methods=['PUT'])
 def dismiss_report(report_id): # Update for Dismissed Report
-    
+    db = current_app.extensions['sqlalchemy']
     try:
         query_report = """
                        UPDATE coach_reports
@@ -221,7 +223,7 @@ def dismiss_report(report_id): # Update for Dismissed Report
 
 @admin_bp.route('/admin/coach-reports/<int:report_id>/ban', methods=['PUT'])
 def coach_ban(report_id): # Update for Coach Banned
-    
+    db = current_app.extensions['sqlalchemy']
     data = request.get_json()
     admin_id = data.get("admin_id")
     reason = data.get("reason")
@@ -278,7 +280,7 @@ def coach_ban(report_id): # Update for Coach Banned
 
 @admin_bp.route('/admin/coach-reports/<int:report_id>/disable', methods=['PUT'])
 def coach_disable(report_id): # Update for Coach Disabled
-    
+    db = current_app.extensions['sqlalchemy']
     data = request.get_json()
     admin_id = data.get("admin_id")
     reason = data.get("reason")
@@ -338,7 +340,7 @@ def coach_disable(report_id): # Update for Coach Disabled
 
 @admin_bp.route('/admin/exercises', methods=['GET'])
 def exercises(): # Search by Name or Shows the Default List
-    
+    db = current_app.extensions['sqlalchemy']
     search = request.args.get('search')
     
     if search and search.strip() != "":
@@ -410,7 +412,7 @@ def exercises(): # Search by Name or Shows the Default List
 
 @admin_bp.route('/admin/exercises', methods=['POST'])
 def exercise_add(): # Updated for Exercise Added
-    
+    db = current_app.extensions['sqlalchemy']
     data = request.get_json()
     admin_id = data.get("admin_id")
     name = data.get("name")
@@ -456,7 +458,7 @@ def exercise_add(): # Updated for Exercise Added
 
 @admin_bp.route('/admin/exercises/<int:exercise_id>', methods=['DELETE'])
 def exercise_remove(exercise_id): # Updated for Exercise Removed
-    
+    db = current_app.extensions['sqlalchemy']
     data = request.get_json()
     admin_id = data.get("admin_id")
     
