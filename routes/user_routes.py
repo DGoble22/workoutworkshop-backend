@@ -249,7 +249,7 @@ def _decode_user_id_from_token() -> tuple[int | None, str | None]:
         return None, 'Invalid token subject.'
 
 
-@user_bp.route('/user/check-survey', methods=['GET'])
+@user_bp.route('/check-survey', methods=['GET'])
 def check_survey():
     user_id, auth_error = _decode_user_id_from_token()
     if auth_error:
@@ -300,7 +300,7 @@ def check_survey():
         'rating': row.get('rating') if row else None
     }), 200
 
-@user_bp.route('/user/daily-survey', methods=['POST'])
+@user_bp.route('/daily-survey', methods=['POST'])
 def save_daily_survey():
     user_id, auth_error = _decode_user_id_from_token()
     if auth_error:
