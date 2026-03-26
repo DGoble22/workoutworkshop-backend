@@ -70,6 +70,59 @@ def upload_profile_picture():
 
     return jsonify({'status': 'error', 'message': 'Invalid file format. Only JPG and PNG are allowed.'}), 400
 
+
+@user_bp.route('/update-username', methods=['PUT'])
+def update_username():
+    # verify user token
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+
+    token = auth_header.split(" ")[1]
+    try:
+        payload = jwt.decode(token, current_app.config['JWT_SECRET_KEY'], algorithms=['HS256'])
+        user_id = payload['sub']
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': 'Invalid token'}), 401
+
+    #get new username from request body
+    data = request.get_json()
+    new_username = data.get('new_username')
+
+    if not new_username:
+        return jsonify({'status': 'error', 'message': 'Username is required'}), 400
+
+    db = current_app.extensions['sqlalchemy']
+
+    try:
+        # Check if username already exists
+        existing_user = db.session.execute(
+            text('SELECT user_id FROM User_login WHERE username = :uname AND user_id != :uid'),
+            {'uname': new_username, 'uid': user_id}
+        ).fetchone()
+
+        if existing_user:
+            return jsonify(
+                {'status': 'error', 'message': 'That username is already taken. Please choose another.'}), 409
+
+        db.session.execute(
+            text('UPDATE User_login SET username = :uname WHERE user_id = :uid'),
+            {'uname': new_username, 'uid': user_id}
+        )
+        db.session.commit()
+
+        return jsonify({'status': 'success', 'message': 'Username updated successfully'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print("DATABASE ERROR:", str(e))  # Helps catch any future issues!
+        return jsonify({'status': 'error', 'message': 'Database error', 'detail': str(e)}), 500
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'status': 'error', 'message': 'Database error', 'detail': str(e)}), 500
+
+
 def _decode_user_id_from_token() -> tuple[int | None, str | None]:
     token = request.headers.get('Authorization')
     if not token:
