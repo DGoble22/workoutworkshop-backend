@@ -123,6 +123,75 @@ def update_username():
         return jsonify({'status': 'error', 'message': 'Database error', 'detail': str(e)}), 500
 
 
+@user_bp.route('/update-goals', methods=['PUT'])
+def update_goals():
+    # verify user token
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({'status': 'error', 'message': 'Unauthorized'}), 401
+
+    token = auth_header.split(" ")[1]
+    try:
+        payload = jwt.decode(token, current_app.config['JWT_SECRET_KEY'], algorithms=['HS256'])
+        user_id = payload['sub']
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': 'Invalid token'}), 401
+
+    data = request.get_json()
+    current_weight = data.get('current_weight')
+    goal_weight = data.get('goal_weight')
+    goal_type = data.get('goal_type')
+    information = data.get('information')
+
+    try:
+        current_weight = float(current_weight)
+        goal_weight = float(goal_weight)
+    except (TypeError, ValueError):
+        return jsonify({'status': 'error', 'message': 'Weights must be valid numbers'}), 400
+
+    db = current_app.extensions['sqlalchemy']
+
+    try:
+        db.session.execute(
+            text('UPDATE User_Profiles SET current_weight = :cw WHERE user_id = :uid'),
+            {'cw': current_weight, 'uid': user_id}
+        )
+
+        #Update goals if they exist for this user; otherwise insert a new row for this user in the goals table.
+        goal_exists = db.session.execute(
+            text('SELECT 1 FROM goals WHERE user_id = :uid'),
+            {'uid': user_id}
+        ).fetchone()
+
+        if goal_exists:
+            db.session.execute(
+                text('''
+                     UPDATE goals
+                     SET goal_weight = :gw,
+                         goal_type   = :gt,
+                         information = :info
+                     WHERE user_id = :uid
+                     '''),
+                {'gw': goal_weight, 'gt': goal_type, 'info': information, 'uid': user_id}
+            )
+        else:
+            db.session.execute(
+                text('''
+                     INSERT INTO goals (user_id, goal_weight, goal_type, information)
+                     VALUES (:uid, :gw, :gt, :info)
+                     '''),
+                {'uid': user_id, 'gw': goal_weight, 'gt': goal_type, 'info': information}
+            )
+
+        db.session.commit()
+        return jsonify({'status': 'success', 'message': 'Goals updated successfully'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print("DATABASE ERROR:", str(e))
+        return jsonify({'status': 'error', 'message': 'Database error', 'detail': str(e)}), 500
+
+
 def _decode_user_id_from_token() -> tuple[int | None, str | None]:
     token = request.headers.get('Authorization')
     if not token:
