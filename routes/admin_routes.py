@@ -1,28 +1,11 @@
 from math import ceil
 from flask import Blueprint, jsonify, request, current_app
-from flask_jwt_extended import verify_jwt_in_request, get_jwt
 from sqlalchemy import text
-
-admin_bp = Blueprint('admin_bp', __name__, url_prefix='/admin')
 
 admin_bp = Blueprint('admin_bp', __name__)
 
 MUSCLE_GROUPS = ['Chest', 'Legs', 'Bicep', 'Tricep', 'Shoulders', 'Back', 'Cardio', 'Abs']
 EQUIPMENTS = ['Machine', 'Free Weight', 'Body Weight']
-
-def admin_required():
-    
-    try:
-        verify_jwt_in_request()
-        claims = get_jwt()
-        
-        if claims.get("role") != "A":
-            return jsonify({"error": "Admin Access Required"}), 403
-        
-        return None
-    
-    except Exception:
-        return jsonify({"error": "Invalid or Missing Token"}), 401
 
 @admin_bp.route('/admin/test', methods=['GET'])
 def admin_test():
@@ -32,9 +15,6 @@ def admin_test():
 
 @admin_bp.route('/admin/coach-applications', methods=['GET'])
 def coach_applications(): # Get the information on Coach Applications
-    auth = admin_required()
-    if auth: return auth
-    
     db = current_app.extensions['sqlalchemy']
     
     try:
@@ -64,9 +44,6 @@ def coach_applications(): # Get the information on Coach Applications
 
 @admin_bp.route('/admin/coach-applications/<int:coach_id>', methods=['GET'])
 def coach_application_details(coach_id): # Get the information for one Coach Application
-    auth = admin_required()
-    if auth: return auth
-    
     db = current_app.extensions['sqlalchemy']
     
     try:
@@ -114,9 +91,6 @@ def coach_application_details(coach_id): # Get the information for one Coach App
 
 @admin_bp.route('/admin/coach-applications/<int:certification_id>/approve', methods=['PUT'])
 def approve_certification(certification_id): # Update the Certification as Approved
-    auth = admin_required()
-    if auth: return auth
-    
     db = current_app.extensions['sqlalchemy']
     data = request.get_json()
     admin_id = data.get("user_id")
@@ -148,9 +122,6 @@ def approve_certification(certification_id): # Update the Certification as Appro
 
 @admin_bp.route('/admin/coach-applications/<int:certification_id>/reject', methods=['PUT'])
 def reject_certification(certification_id): # Update the Certification as Rejected
-    auth = admin_required()
-    if auth: return auth
-    
     db = current_app.extensions['sqlalchemy']
     data = request.get_json()
     admin_id = data.get("user_id")
@@ -184,9 +155,6 @@ def reject_certification(certification_id): # Update the Certification as Reject
 
 @admin_bp.route('/admin/coach-reports', methods=['GET'])
 def coach_reports(): # Get the information on Coach Reports
-    auth = admin_required()
-    if auth: return auth
-    
     db = current_app.extensions['sqlalchemy']
     
     try:
@@ -217,9 +185,6 @@ def coach_reports(): # Get the information on Coach Reports
 
 @admin_bp.route('/admin/coach-reports/<int:report_id>', methods=['GET'])
 def coach_report_details(report_id): # Get the information for one Coach Report
-    auth = admin_required()
-    if auth: return auth
-    
     db = current_app.extensions['sqlalchemy']
     
     try:
@@ -258,9 +223,6 @@ def coach_report_details(report_id): # Get the information for one Coach Report
 
 @admin_bp.route('/admin/coach-reports/<int:report_id>/dismiss', methods=['PUT'])
 def dismiss_report(report_id): # Update for Dismissed Report
-    auth = admin_required()
-    if auth: return auth
-    
     db = current_app.extensions['sqlalchemy']
     
     try:
@@ -283,9 +245,6 @@ def dismiss_report(report_id): # Update for Dismissed Report
 
 @admin_bp.route('/admin/coach-reports/<int:report_id>/ban', methods=['PUT'])
 def coach_ban(report_id): # Update for Coach Banned
-    auth = admin_required()
-    if auth: return auth
-    
     db = current_app.extensions['sqlalchemy']
     data = request.get_json()
     admin_id = data.get("user_id")
@@ -343,9 +302,6 @@ def coach_ban(report_id): # Update for Coach Banned
 
 @admin_bp.route('/admin/coach-reports/<int:report_id>/disable', methods=['PUT'])
 def coach_disable(report_id): # Update for Coach Disabled
-    auth = admin_required()
-    if auth: return auth
-    
     db = current_app.extensions['sqlalchemy']
     data = request.get_json()
     admin_id = data.get("user_id")
@@ -406,9 +362,6 @@ def coach_disable(report_id): # Update for Coach Disabled
 
 @admin_bp.route('/admin/exercises', methods=['GET'])
 def exercises(): # Search by Name or Shows the Default List
-    auth = admin_required()
-    if auth: return auth
-    
     db = current_app.extensions['sqlalchemy']
     search = request.args.get('search')
     
@@ -481,9 +434,6 @@ def exercises(): # Search by Name or Shows the Default List
 
 @admin_bp.route('/admin/exercises', methods=['POST'])
 def exercise_add(): # Updated for Exercise Added
-    auth = admin_required()
-    if auth: return auth
-    
     db = current_app.extensions['sqlalchemy']
     data = request.get_json()
     admin_id = data.get("user_id")
@@ -530,9 +480,6 @@ def exercise_add(): # Updated for Exercise Added
 
 @admin_bp.route('/admin/exercises/<int:exercise_id>', methods=['DELETE'])
 def exercise_remove(exercise_id): # Updated for Exercise Removed
-    auth = admin_required()
-    if auth: return auth
-    
     db = current_app.extensions['sqlalchemy']
     data = request.get_json()
     admin_id = data.get("user_id")
@@ -563,27 +510,74 @@ def exercise_remove(exercise_id): # Updated for Exercise Removed
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
-@admin_bp.route('/fetch-users', methods=['GET'])
+@admin_bp.route('/admin/exercises/<int:exercise_id>', methods=['PUT'])
+def exercise_edit(exercise_id): # Updated for Exercise Edited
+    db = current_app.extensions['sqlalchemy']
+    data = request.get_json()
+    admin_id = data.get("user_id")
+    name = data.get("name")
+    muscle_group = data.get("muscle_group")
+    equipment = data.get("equipment_needed")
+    video_url = data.get("video_url")
+    
+    if not all([admin_id, name, muscle_group, equipment]):
+        return jsonify({"error": "admin_id, name, muscle_group, and equipment are required"}), 400
+    
+    if muscle_group not in MUSCLE_GROUPS:
+        return jsonify({"error": "Invalid Muscle Groups"}), 400
+    
+    if equipment not in EQUIPMENTS:
+        return jsonify({"error": "Invalid Equipments"}), 400
+    
+    try:
+        query_exercise = """
+                         UPDATE exercises
+                         SET name = :name, muscle_group = :muscle_group, equipment_needed = :equipment_needed, video_url = :video_url
+                         WHERE exercise_id = :exercise_id
+                         """
+        
+        db.session.execute(db.text(query_exercise), {"exercise_id": exercise_id, "name": name, "muscle_group": muscle_group, "equipment_needed": equipment, "video_url": video_url})
+        
+        query_change = """
+                       INSERT INTO exercise_changes (admin_id, exercise_id, event)
+                       VALUES (:admin_id, :exercise_id, 'edit')
+                       """
+        
+        db.session.execute(db.text(query_change), {"admin_id": admin_id, "exercise_id": exercise_id})
+        db.session.commit()
+        
+        return jsonify({
+            "status": "success",
+            "message": "Exercise Edited Successfully"
+        })
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+# Use Case Extra Requirements
+
+@admin_bp.route('/admin/fetch-users', methods=['GET'])
 def fetch_users():
     db = current_app.extensions['sqlalchemy']
-
+    
     try:
         page = max(int(request.args.get('page', 1)), 1)
     except (TypeError, ValueError):
         page = 1
-
+    
     try:
         limit = int(request.args.get('limit', 10))
     except (TypeError, ValueError):
         limit = 10
+    
     limit = min(max(limit, 1), 100)
-
     search = (request.args.get('search') or '').strip()
     offset = (page - 1) * limit
-
+    
     where_sql = ''
     params = {'limit': limit, 'offset': offset}
-
+    
     if search:
         where_sql = (
             'WHERE '
@@ -593,7 +587,7 @@ def fetch_users():
             'OR CAST(u.user_id AS CHAR) LIKE :search '
         )
         params['search'] = f'%{search}%'
-
+    
     count_sql = text(
         'SELECT COUNT(*) AS total '
         'FROM Users u '
@@ -601,7 +595,7 @@ def fetch_users():
         'LEFT JOIN User_Profiles up ON up.user_id = u.user_id '
         f'{where_sql}'
     )
-
+    
     data_sql = text(
         'SELECT '
         'u.user_id, u.role, u.is_banned, u.is_disabled, u.create_date, '
@@ -614,7 +608,7 @@ def fetch_users():
         'ORDER BY u.user_id ASC '
         'LIMIT :limit OFFSET :offset'
     )
-
+    
     try:
         total_users = db.session.execute(count_sql, params).scalar() or 0
         rows = db.session.execute(data_sql, params).mappings().all()
@@ -624,7 +618,7 @@ def fetch_users():
             'message': 'Failed to fetch users.',
             'detail': str(e)
         }), 500
-
+    
     users = [
         {
             'id': r.get('user_id'),
@@ -640,9 +634,9 @@ def fetch_users():
         }
         for r in rows
     ]
-
+    
     total_pages = max(ceil(total_users / limit), 1)
-
+    
     return jsonify({
         'users': users,
         'totalPages': total_pages,
