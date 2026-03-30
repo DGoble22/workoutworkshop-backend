@@ -305,10 +305,11 @@ def coach_report_details(report_id): # Get the information for one Coach Report
     try:
         query = """
                 SELECT cr.report_id, cr.reason, cr.status, cp.coach_id, cp.pricing, cp.is_active, cp.is_nutritionist, cp.bio,
-                       up.user_id, CONCAT(up.first_name, ' ', up.last_name) AS display_name, up.profile_picture_url
+                       up.user_id, CONCAT(up.first_name, ' ', up.last_name) AS display_name, up.profile_picture_url, AVG(crv.rating) as rating
                 FROM coach_reports cr
                 JOIN coach_profiles cp ON cr.coach_id = cp.coach_id
                 JOIN user_profiles up ON cp.user_id = up.user_id
+                JOIN coach_reviews crv ON cp.coach_id = crv.coach_id
                 WHERE cr.report_id = :report_id
                 """
         
@@ -328,6 +329,7 @@ def coach_report_details(report_id): # Get the information for one Coach Report
                 "profile_picture": result.profile_picture_url,
                 "bio": result.bio,
                 "pricing": float(result.pricing),
+                "rating": float(result.rating) if result.rating is not None else None,
                 "is_active": bool(result.is_active),
                 "is_nutritionist": bool(result.is_nutritionist)
             }
