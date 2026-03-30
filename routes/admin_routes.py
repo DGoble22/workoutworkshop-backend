@@ -191,7 +191,7 @@ def approve_certification(certification_id): # Update the Certification as Appro
 def reject_certification(certification_id): # Update the Certification as Rejected
     db = current_app.extensions['sqlalchemy']
     data = request.get_json()
-    admin_id = data.get("user_id")
+    admin_id = data.get("admin_id")
     
     try:
         query_certification = """
