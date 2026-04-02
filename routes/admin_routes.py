@@ -536,10 +536,14 @@ def exercises(): # Search by Name or Shows the Default List
             "video_url": row.video_url
         }
         
-        if row.muscle_group in ["Bicep", "Tricep", "Shoulders"]:
+        if row.muscle_group in ["Bicep", "Tricep", "Shoulders","Forearms",]:
             grouped["Arms"].append(exercise)
         elif row.muscle_group == "Abs":
             grouped["Core"].append(exercise)
+        elif row.muscle_group in ["Back","Lats","Traps","Lower Back"]:
+            grouped["Back"].append(exercise)
+        elif row.muscle_group in ["Legs","Glutes","Hamstrings","Quads","Calves"]:
+            grouped["Legs"].append(exercise)
         elif row.muscle_group in grouped:
             grouped[row.muscle_group].append(exercise)
     
@@ -549,7 +553,7 @@ def exercises(): # Search by Name or Shows the Default List
         "data": grouped
     })
 
-@admin_bp.route('/admin/exercises', methods=['POST'])
+@admin_bp.route('/admin/exercises/add', methods=['POST'])
 def exercise_add(): # Updated for Exercise Added
     db = current_app.extensions['sqlalchemy']
     data = request.get_json()
@@ -595,7 +599,7 @@ def exercise_add(): # Updated for Exercise Added
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
-@admin_bp.route('/admin/exercises/<int:exercise_id>', methods=['DELETE'])
+@admin_bp.route('/admin/exercises/remove/<int:exercise_id>', methods=['DELETE'])
 def exercise_remove(exercise_id): # Updated for Exercise Removed
     db = current_app.extensions['sqlalchemy']
     data = request.get_json()
@@ -627,7 +631,7 @@ def exercise_remove(exercise_id): # Updated for Exercise Removed
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
-@admin_bp.route('/admin/exercises/<int:exercise_id>', methods=['PUT'])
+@admin_bp.route('/admin/exercises/update/<int:exercise_id>', methods=['PUT'])
 def exercise_edit(exercise_id): # Updated for Exercise Edited
     db = current_app.extensions['sqlalchemy']
     data = request.get_json()
