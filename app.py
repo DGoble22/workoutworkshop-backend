@@ -13,7 +13,7 @@ from sqlalchemy import text
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 # DB Config
 db_user = os.getenv('DB_USER')
