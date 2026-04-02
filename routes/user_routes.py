@@ -167,3 +167,31 @@ def save_daily_survey():
         'date': target_day.isoformat(),
         'created': created
     }), 200
+
+@user_bp.route('/user/get-all-excersizes/<group>', methods=['GET'])  
+def get_all_excersizes(group):
+    db = current_app.extensions['sqlalchemy']
+    try:
+        # Main Query to get a single coach data
+        query = """SELECT * from exercises
+        WHERE muscle_group like :group
+        """
+        exercises = db.session.execute(db.text(query), {"group": group}).fetchall()
+        if exercises:
+            exercises_data=[{"name": e[1], "group": e[2], "equipment": e[3], "URL": e[4]} for e in exercises]
+            return jsonify({
+                "status": "success",
+                "data": exercises_data
+            }), 200
+        else:
+            return jsonify({
+                "status": "error",
+                "message": "group not found"
+            }), 404
+
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
