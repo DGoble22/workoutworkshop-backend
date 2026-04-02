@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from routes.admin_routes import admin_bp
@@ -8,6 +8,7 @@ from routes.user_routes import user_bp
 from routes.workout_routes import workout_bp
 from dotenv import load_dotenv
 import os
+from sqlalchemy import text
 
 load_dotenv()
 
@@ -46,6 +47,6 @@ def test_db():
             "status": "error",
             "message": str(e)
         }), 500
-
+    
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host='localhost')
