@@ -93,13 +93,14 @@ def save_workout():
                                     VALUES (:plan_id, :exercise_id, :sets, :reps, :weight)
                                     """)
 
+        # Defaults sets, reps, weight to 0 if empty
         for exercise in exercises:
             db.session.execute(insert_exercise_query, {
                 "plan_id": plan_id,
                 "exercise_id": exercise['exercise_id'],
-                "sets": 0,
-                "reps": 0,
-                "weight": 0
+                "sets": exercise.get('sets', 0),
+                "reps": exercise.get('reps', 0),
+                "weight": exercise.get('weight', 0)
             })
 
         db.session.commit()
@@ -197,7 +198,7 @@ def update_workout_plan(plan_id):
 
 
 @workout_bp.route('/plan/<int:plan_id>/exercise/<int:exercise_id>', methods=['DELETE'])
-def remove_exercise_from_plan(plan_id, exercise_id):
+def remove_exercise_from_log(plan_id, exercise_id):
     db = current_app.extensions['sqlalchemy']
 
     try:
@@ -222,6 +223,34 @@ def remove_exercise_from_plan(plan_id, exercise_id):
         db.session.rollback()
         print("DATABASE ERROR:", str(e))
         return jsonify({'status': 'error', 'message': 'Failed to remove exercise'}), 500
+
+# Change '/log/<int:plan_id>' to '/plan/<int:plan_id>'
+@workout_bp.route('/plan/<int:plan_id>', methods=['DELETE'])
+def remove_workout_from_log(plan_id):
+    db = current_app.extensions['sqlalchemy']
+
+    try:
+        # Delete all exercises to prevent foreign key constraint issues
+        delete_exercises_query = text("""
+            DELETE FROM plan_exercise 
+            WHERE plan_id = :plan_id
+        """)
+        db.session.execute(delete_exercises_query, {"plan_id": plan_id})
+
+        # Delete workout plan
+        delete_plan_query = text("""
+            DELETE FROM workout_plans 
+            WHERE plan_id = :plan_id
+        """)
+        db.session.execute(delete_plan_query, {"plan_id": plan_id})
+
+        db.session.commit()
+        return jsonify({'status': 'success', 'message': 'Workout deleted successfully!'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        print("DATABASE ERROR:", str(e))
+        return jsonify({'status': 'error', 'message': 'Failed to delete workout'}), 500
 
 
 @workout_bp.route('/remove', methods=["POST"])
