@@ -36,7 +36,7 @@ def get_daily_plan(user_id, DOW):
     try:
         #Grab all exercises that are available
         query = text("""
-                    select pe.plan_id, pe.exercise_id, e.name, e.equipment_needed, pe.sets, pe.reps, pe.weight from workout_plans wp
+                    select pe.plan_id, pe.plan_exercise_id, pe.exercise_id, e.name, e.equipment_needed, pe.sets, pe.reps, pe.weight, pe.completed from workout_plans wp
                     join plan_exercise pe
                     on wp.plan_id = pe.plan_id
                     join exercises e
@@ -49,8 +49,13 @@ def get_daily_plan(user_id, DOW):
 
         # Convert result to list of dicts
         exercises = [dict(row) for row in result]
+        if len(result) > 0:
+            hasPlan = True
+        else:
+            hasPlan = False
 
-        return jsonify({'status': 'success', 'data': exercises}), 200
+
+        return jsonify({'status': 'success', 'data': exercises, 'hasPlan': hasPlan}), 200
 
     except Exception as e:
         print("DATABASE ERROR:", str(e))
@@ -318,11 +323,11 @@ def edit_exercise():
     
         exercise_id = payload.get("exercise_id")
         plan_id = payload.get("plan_id")
-        reps = payload.get("reps")
-        sets = payload.get("sets")
-        weight = payload.get("weight")
+        reps = payload.get("reps") or None
+        sets = payload.get("sets") or None
+        weight = payload.get("weight") or None
 
-        if not all([exercise_id, plan_id, reps, sets, weight]):
+        if not all([exercise_id, plan_id]):
             return jsonify({
                 'status':  'error',
                 'message': 'failed to recieve data'
@@ -343,3 +348,35 @@ def edit_exercise():
     
     except:
         return jsonify({"message":"Error Adding Exercise"}), 403
+
+# toggle complete flag on exercise for home page
+@workout_bp.route('/complete-exercise', methods=['POST'])
+def complete_workout():
+    payload = request.get_json(silent=True) or {}
+
+    try:
+        plan_exercise_id = payload.get("plan_exercise_id")
+        complete = payload.get("complete")
+
+        if plan_exercise_id is None or complete is None:
+            print(plan_exercise_id, complete)
+            return jsonify({
+                'status':  'error',
+                'message': 'failed to recieve plan_exercise_id or completed flag'
+            }), 400
+
+        db  = current_app.extensions['sqlalchemy']
+        session = db.session
+
+        session.execute(
+            text(
+                'UPDATE plan_exercise set completed=:complete WHERE plan_exercise_id=:plan_exercise_id'
+            ),
+                {'complete': complete, 'plan_exercise_id': plan_exercise_id}
+        )
+
+        session.commit()
+        return jsonify({"message":"Exercise Completion Toggled"}), 200
+        
+    except:
+        return jsonify({"message":"Error Removing Exercise"}), 400

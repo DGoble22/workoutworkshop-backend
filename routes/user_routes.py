@@ -167,3 +167,33 @@ def save_daily_survey():
         'date': target_day.isoformat(),
         'created': created
     }), 200
+
+# check if user has coach, if yes get coach's id for future use
+@user_bp.route('/user/has-coach/<int:user_id>', methods=['GET'])
+def user_has_coach(user_id):
+    db = current_app.extensions['sqlalchemy']
+    try:
+        # Main Query to get a single coach data
+        query = """SELECT coach_id, user_id FROM coach_subscriptions
+                    WHERE user_id = :user_id"""
+        review = db.session.execute(db.text(query), {"user_id": user_id}).fetchall()
+
+        if len(review) > 0:
+            hasCoach = True
+            coach_id = query[0]["coach_id"]
+        else:
+            hasCoach = False
+            coach_id = None
+
+        return jsonify({
+            "status":"success",
+            "hasCoach":hasCoach,
+            "coach_id":coach_id
+        })
+
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
