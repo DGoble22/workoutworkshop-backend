@@ -282,6 +282,8 @@ def submit_review():
 
     except: 
         return jsonify({"message":"Error sending application"}), 400
+
+
         
 
 
