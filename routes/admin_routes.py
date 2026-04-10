@@ -9,6 +9,12 @@ EQUIPMENTS = ['Machine', 'Free Weight', 'Body Weight']
 
 @admin_bp.route('/admin/test', methods=['GET'])
 def admin_test():
+    """
+    Checks that the routes to admin are alright.
+    ---
+    tags:
+        - Test
+    """
     return jsonify({"message": "Routes to Admin are fine!"})
 
 # Use Case 5.1 - Verify and Approve Coach Applications / Certifications
@@ -91,6 +97,19 @@ def coach_applications(): # Get the information on Coach Applications
 
 @admin_bp.route('/admin/coach-applications/<int:coach_id>', methods=['GET'])
 def coach_application_details(coach_id): # Get the information for one Coach Application
+    """
+    Checks if one coach application is received.
+    ---
+    tags:
+        - Admin
+    parameters:
+        - name: coach_id
+          type: integer
+          in: path
+    responses:
+        200:
+            description: Success
+    """
     db = current_app.extensions['sqlalchemy']
     
     try:

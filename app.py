@@ -11,12 +11,14 @@ import os
 from routes.chat import register_chat_events
 from sqlalchemy import text
 from flask_socketio import SocketIO
+from flasgger import Swagger
 
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 socketio = SocketIO(app, cors_allowed_origins="*")
+Swagger(app)
 
 # DB Config
 db_user = os.getenv('DB_USER')
