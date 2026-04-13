@@ -4,16 +4,12 @@ from sqlalchemy import text
 
 admin_bp = Blueprint('admin_bp', __name__)
 
-<<<<<<< HEAD
-MUSCLE_GROUPS = ['Back', 'Arms', 'Legs', 'Chest', 'Core', 'Cardio']
-=======
 MUSCLE_GROUPS = [
     'Arms', 'Legs', 'Chest', 'Back', 'Cardio', 'Core',
     'Bicep', 'Tricep', 'Shoulders', 'Forearms', 'Abs',
     'Lats', 'Traps', 'Lower Back', 'Glutes', 'Hamstrings',
     'Quads', 'Calves'
 ]
->>>>>>> main
 EQUIPMENTS = ['Machine', 'Free Weight', 'Body Weight']
 
 @admin_bp.route('/admin/test', methods=['GET'])
@@ -1103,9 +1099,6 @@ def fetch_users():
         'totalPages': total_pages,
         'currentPage': page,
         'totalUsers': total_users
-<<<<<<< HEAD
-    }), 200
-=======
     }), 200
 
 @admin_bp.route('/admin/platform-metrics', methods=['GET'])
@@ -1143,4 +1136,3 @@ def platform_metrics():
             'message': 'Failed to fetch platform metrics.',
             'detail': str(e)
         }), 500
->>>>>>> main
