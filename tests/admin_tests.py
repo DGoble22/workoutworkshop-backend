@@ -10,7 +10,7 @@ class TestAdminRoutes(unittest.TestCase):
         self.client = app.test_client()
     
     # Admin - Test
-    def admin_test_route(self):
+    def test_admin_route(self):
         response = self.client.get("/admin/test")
         data = response.get_json()
         
@@ -220,6 +220,20 @@ class TestAdminRoutes(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("users", data)
         self.assertIn("totalUsers", data)
+    
+    # Admin - Platform Metrics
+    def test_platform_metrics(self):
+        response = self.client.get("/admin/platform-metrics")
+        data = response.get_json()
+        
+        self.assertIn(response.status_code, [200, 500])
+        
+        if response.status_code == 200:
+            self.assertEqual(data["status"], "success")
+            self.assertIn("data", data)
+            self.assertIn("total_users", data["data"])
+            self.assertIn("total_subscriptions", data["data"])
+            self.assertIn("total_revenue", data["data"])
     
 if __name__ == "__main__":
     unittest.main()

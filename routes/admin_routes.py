@@ -5,9 +5,9 @@ from sqlalchemy import text
 admin_bp = Blueprint('admin_bp', __name__)
 
 MUSCLE_GROUPS = [
-    'Arms', 'Legs', 'Chest', 'Back', 'Cardio', 'Core',
-    'Bicep', 'Tricep', 'Shoulders', 'Forearms', 'Abs',
-    'Lats', 'Traps', 'Lower Back', 'Glutes', 'Hamstrings',
+    'Arms', 'Legs', 'Chest', 'Back', 'Cardio', 'Core', 
+    'Bicep', 'Tricep', 'Shoulders', 'Forearms', 'Abs', 
+    'Lats', 'Traps', 'Lower Back', 'Glutes', 'Hamstrings', 
     'Quads', 'Calves'
 ]
 EQUIPMENTS = ['Machine', 'Free Weight', 'Body Weight']
@@ -1103,8 +1103,40 @@ def fetch_users():
 
 @admin_bp.route('/admin/platform-metrics', methods=['GET'])
 def platform_metrics():
+    """
+    Get the Platform-Wide Metrics
+    ---
+    tags:
+        - Admin - Platform Metrics
+    description:
+        Retrieves key platform statistics including total users, total subscriptions, 
+        and total revenue generated from coach subscriptions.
+    responses:
+        200:
+            description: Successfully retrieved platform metrics
+            schema:
+                type: object
+                properties:
+                    status:
+                        type: string
+                        example: success
+                    data:
+                        type: object
+                        properties:
+                            total_users:
+                                type: integer
+                                example: 142
+                            total_subscriptions:
+                                type: integer
+                                example: 38
+                            total_revenue:
+                                type: number
+                                example: 1124.78
+        500:
+            description: Failed to fetch platform metrics
+    """
     db = current_app.extensions['sqlalchemy']
-
+    
     try:
         metrics_sql = text(
             'SELECT '
@@ -1118,9 +1150,9 @@ def platform_metrics():
             "  WHERE u.role = 'U' "
             '), 0) AS total_revenue'
         )
-
+        
         row = db.session.execute(metrics_sql).mappings().first() or {}
-
+        
         return jsonify({
             'status': 'success',
             'data': {
@@ -1129,7 +1161,7 @@ def platform_metrics():
                 'total_revenue': float(row.get('total_revenue') or 0)
             }
         }), 200
-
+    
     except Exception as e:
         return jsonify({
             'status': 'error',
