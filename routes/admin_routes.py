@@ -5,9 +5,9 @@ from sqlalchemy import text
 admin_bp = Blueprint('admin_bp', __name__)
 
 MUSCLE_GROUPS = [
-    'Arms', 'Legs', 'Chest', 'Back', 'Cardio', 'Core', 
-    'Bicep', 'Tricep', 'Shoulders', 'Forearms', 'Abs', 
-    'Lats', 'Traps', 'Lower Back', 'Glutes', 'Hamstrings', 
+    'Arms', 'Legs', 'Chest', 'Back', 'Cardio', 'Core',
+    'Bicep', 'Tricep', 'Shoulders', 'Forearms', 'Abs',
+    'Lats', 'Traps', 'Lower Back', 'Glutes', 'Hamstrings',
     'Quads', 'Calves'
 ]
 EQUIPMENTS = ['Machine', 'Free Weight', 'Body Weight']
