@@ -471,3 +471,4 @@ def get_coach_id(user_id):
         return jsonify({"status": "success", "coach_id": result[0]}), 200
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+    
