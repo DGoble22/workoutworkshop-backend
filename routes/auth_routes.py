@@ -65,6 +65,37 @@ def build_auth_success_response(token: str, user_payload: dict, status_code: int
 #login Route
 @auth_bp.route('/login', methods=['POST'])
 def login():
+    """
+    Authenticate a user by username and password
+    ---
+    tags:
+      - Auth
+    consumes:
+      - application/json
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - username
+            - password
+          properties:
+            username:
+              type: string
+            password:
+              type: string
+    responses:
+      200:
+        description: Login successful
+      400:
+        description: Missing required fields
+      401:
+        description: Invalid credentials
+      500:
+        description: Database error
+    """
     payload  = request.get_json(silent=True) or {}
     username = (payload.get('username') or '').strip()
     password = payload.get('password')
@@ -129,6 +160,32 @@ def login():
 
 @auth_bp.route('/check-username', methods=['POST'])
 def checkusername():
+    """
+    Check whether a username is available
+    ---
+    tags:
+      - Auth
+    consumes:
+      - application/json
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - username
+          properties:
+            username:
+              type: string
+    responses:
+      200:
+        description: Availability check result
+      400:
+        description: Username is required
+      500:
+        description: Database error
+    """
     payload = request.get_json(silent=True) or {}
     username = (payload.get('username') or '').strip()
 
@@ -317,6 +374,52 @@ def _insert_coach_certifications(session, coach_id: int, certifications: list, f
 # Register Route
 @auth_bp.route('/register', methods=['POST'])
 def register():
+    """
+    Register a new user or coach
+    ---
+    tags:
+      - Auth
+    consumes:
+      - multipart/form-data
+    parameters:
+      - in: formData
+        name: username
+        type: string
+        required: true
+      - in: formData
+        name: password
+        type: string
+        required: true
+      - in: formData
+        name: first_name
+        type: string
+        required: true
+      - in: formData
+        name: last_name
+        type: string
+        required: true
+      - in: formData
+        name: birthday
+        type: string
+        required: true
+      - in: formData
+        name: current_weight
+        type: string
+        required: true
+      - in: formData
+        name: goal_weight
+        type: string
+        required: true
+    responses:
+      201:
+        description: Registration successful
+      400:
+        description: Missing required fields
+      409:
+        description: Username already exists
+      500:
+        description: Registration failed
+    """
     payload = _extract_registration_input()
 
     # --- Required fields ---
@@ -538,6 +641,41 @@ def register():
 
 @auth_bp.route('/change-password', methods=['PATCH'])
 def changePassword():
+    """
+    Change the current user's password
+    ---
+    tags:
+      - Auth
+    consumes:
+      - application/json
+    parameters:
+      - in: header
+        name: Authorization
+        type: string
+        required: true
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - current_password
+            - new_password
+          properties:
+            current_password:
+              type: string
+            new_password:
+              type: string
+    responses:
+      200:
+        description: Password changed
+      400:
+        description: Missing required fields
+      401:
+        description: Unauthorized or invalid password
+      500:
+        description: Update failed
+    """
     # verify user token
     auth_header = request.headers.get('Authorization')
     if not auth_header or not auth_header.startswith("Bearer "):
