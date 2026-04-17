@@ -9,14 +9,15 @@ from routes.workout_routes import workout_bp
 from dotenv import load_dotenv
 import os
 from routes.chat import register_chat_events
-from sqlalchemy import text
 from flask_socketio import SocketIO
+from flasgger import Swagger
 
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 socketio = SocketIO(app, cors_allowed_origins="*")
+Swagger(app)
 
 # DB Config
 db_user = os.getenv('DB_USER')
@@ -37,21 +38,5 @@ app.register_blueprint(workout_bp)
 
 register_chat_events(socketio, app)
 
-@app.route('/test-db')
-def test_db():
-    try:
-        # We use db.text() to run a raw SQL 'ping'
-        result = db.session.execute(db.text("SELECT 1")).fetchone()
-        return jsonify({
-            "status": "success",
-            "message": "Flask is talking to MySQL!",
-            "result": result[0]
-        }), 200
-    except Exception as e:
-        return jsonify({
-            "status": "error",
-            "message": str(e)
-        }), 500
-    
 if __name__ == '__main__':
     socketio.run(app, debug=True, port=5000, host='localhost')
