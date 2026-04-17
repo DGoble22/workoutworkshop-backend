@@ -16,6 +16,7 @@ class TestAuthRoutes(unittest.TestCase):
         with app.app_context():
             db = app.extensions['sqlalchemy']
             test_usernames = ["new_unit_tester2", "coach_tester"]
+            test_exercise_names = ["UnitTest Exercise"]
 
             def _exec_in(sql: str, key: str, values: list):
                 if not values:
@@ -24,6 +25,19 @@ class TestAuthRoutes(unittest.TestCase):
                 db.session.execute(stmt, {key: values})
 
             try:
+                # Remove any exercises created by the mock admin test user first.
+                exercise_ids = db.session.execute(
+                    text("SELECT exercise_id FROM exercises WHERE name IN :names").bindparams(
+                        bindparam("names", expanding=True)
+                    ),
+                    {"names": test_exercise_names}
+                ).scalars().all()
+
+                if exercise_ids:
+                    _exec_in("DELETE FROM plan_exercise WHERE exercise_id IN :ids", "ids", exercise_ids)
+                    _exec_in("DELETE FROM exercise_changes WHERE exercise_id IN :ids", "ids", exercise_ids)
+                    _exec_in("DELETE FROM exercises WHERE exercise_id IN :ids", "ids", exercise_ids)
+
                 user_ids = db.session.execute(
                     text("SELECT user_id FROM User_login WHERE username IN :names").bindparams(
                         bindparam("names", expanding=True)
