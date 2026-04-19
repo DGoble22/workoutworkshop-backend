@@ -12,7 +12,7 @@ def get_exercises():
     try:
         # Grab all exercises that are available
         query = text("""
-                     SELECT exercise_id, name, muscle_group, equipment_needed, video_url
+                     SELECT exercise_id, name, muscle_group, equipment_needed, video_url, thumbnail
                      FROM exercises
                      WHERE is_removed = 0
                      """)
@@ -164,7 +164,7 @@ def get_workout_plan_details(plan_id):
     try:
         # Join the plan_exercise table with the exercises table to get the names/urls
         query = text("""
-                     SELECT pe.exercise_id, e.name as exercise_name, e.video_url, pe.sets, pe.reps, pe.weight
+                     SELECT pe.exercise_id, e.name as exercise_name, e.video_url, pe.sets, pe.reps, pe.weight, e.thumbnail
                      FROM plan_exercise pe
                               JOIN exercises e ON pe.exercise_id = e.exercise_id
                      WHERE pe.plan_id = :plan_id
