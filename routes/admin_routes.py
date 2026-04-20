@@ -21,7 +21,13 @@ def admin_test():
         - Admin - Test
     responses:
         200:
-            description: Routes to admin are alright
+          description: Routes to admin are alright
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Routes to Admin are fine!
     """
     return jsonify({"message": "Routes to Admin are fine!"})
 
@@ -38,15 +44,49 @@ def coach_applications(): # Get the information on Coach Applications
         - name: page
           in: query
           type: integer
+          example: 1
         - name: limit
           in: query
           type: integer
+          example: 10
         - name: search
           in: query
           type: string
+          example: John
     responses:
         200:
-            description: List of "pending" coach applications
+          description: List of "pending" coach applications
+          schema:
+            type: object
+            properties:
+              applications:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    coach_id:
+                      type: integer
+                      example: 5
+                    name:
+                      type: string
+                      example: John Doe
+                    certification_id:
+                      type: integer
+                      example: 12
+                    status:
+                      type: string
+                      example: pending
+              totalPages:
+                type: integer
+                example: 3
+              currentPage:
+                type: integer
+                example: 1
+              totalApplications:
+                type: integer
+                example: 25
+        500:
+          description: Error in the database
     """
     db = current_app.extensions['sqlalchemy']
 
@@ -134,11 +174,49 @@ def coach_application_details(coach_id): # Get the information for one Coach App
           in: path
           type: integer
           required: true
+          example: 1
     responses:
         200:
-            description: Opens the coach application details
+          description: Opens the coach application details
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                example: John Doe
+              payment:
+                type: number
+                example: 29.99
+              bio:
+                type: string
+                example: Certified Coach
+              certifications:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    certification_id:
+                      type: integer
+                    certification_url:
+                      type: string
+                    status:
+                      type: string
+              availability:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    day:
+                      type: string
+                      example: M
+                    start_time:
+                      type: string
+                    end_time:
+                      type: string
         404:
-            description: The coach can't be found
+          description: Coach Not Found
+        500:
+          description: Error in the database
     """
     db = current_app.extensions['sqlalchemy']
     
@@ -223,13 +301,24 @@ def approve_certification(certification_id): # Update the Certification as Appro
           schema:
             type: object
             required:
-                - admin_id
+              - admin_id
             properties:
               admin_id:
                 type: integer
+                example: 1
     responses:
         200:
-            description: The coach certification is now approved
+          description: The coach certification is now approved
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Coach Certification Approved
+        400:
+          description: Missing Admin Id
+        500:
+          description: Error in the database
     """
     db = current_app.extensions['sqlalchemy']
     data = request.get_json()
@@ -278,13 +367,24 @@ def reject_certification(certification_id): # Update the Certification as Reject
           schema:
             type: object
             required:
-                - admin_id
+              - admin_id
             properties:
               admin_id:
                 type: integer
+                example: 1
     responses:
         200:
-            description: The coach certification is now rejected
+          description: The coach certification is now rejected
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Coach Certification Rejected
+        400:
+          description: Missing Admin Id
+        500:
+          description: Error in the database
     """
     db = current_app.extensions['sqlalchemy']
     data = request.get_json()
@@ -336,7 +436,33 @@ def coach_reports(): # Get the information on Coach Reports
           type: string
     responses:
         200:
-            description: List of "pending" coach reports
+          description: List of "pending" coach reports
+          schema:
+            type: object
+            properties:
+              reports:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    report_id:
+                      type: integer
+                    coach_id:
+                      type: integer
+                    name:
+                      type: string
+                    reason:
+                      type: string
+                    status:
+                      type: string
+              totalPages:
+                type: integer
+              currentPage:
+                type: integer
+              totalReports:
+                type: integer
+        500:
+          description: Error in the database
     """
     db = current_app.extensions['sqlalchemy']
 
@@ -428,9 +554,11 @@ def coach_report_details(report_id): # Get the information for one Coach Report
           required: true
     responses:
         200:
-            description: Opens the coach report details
+          description: Opens the coach report details
         404:
-            description: The coach report can't be found
+          description: Coach Report Not Found
+        500:
+          description: Error in the database
     """
     db = current_app.extensions['sqlalchemy']
     
@@ -484,7 +612,15 @@ def dismiss_report(report_id): # Update for Dismissed Report
           required: true
     responses:
         200:
-            description: The coach report is now dismissed
+          description: The coach report is now dismissed
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Report Dismissed Successfully
+        500:
+          description: Error in the database
     """
     db = current_app.extensions['sqlalchemy']
     
@@ -533,9 +669,13 @@ def coach_ban(report_id): # Update for Coach Banned
                 type: string
     responses:
         200:
-            description: The coach is now banned
+          description: The coach is now banned
         400:
-            description: There are missing required fields
+          description: There are missing required fields
+        404:
+          description: Coach Report Not Found
+        500:
+          description: Error in the database
     """
     db = current_app.extensions['sqlalchemy']
     data = request.get_json()
@@ -628,7 +768,13 @@ def coach_disable(report_id): # Update for Coach Disabled
                 type: integer
     responses:
         200:
-            description: The coach is now disabled
+          description: The coach is now disabled
+        400:
+          description: There are missing required fields
+        404:
+          description: Coach Report Not Found
+        500:
+          description: Error in the database
     """
     db = current_app.extensions['sqlalchemy']
     data = request.get_json()
@@ -701,7 +847,7 @@ def exercises(): # Search by Name or Shows the Default List
           type: string
     responses:
         200:
-            description: List of exercises
+          description: List of exercises
     """
     db = current_app.extensions['sqlalchemy']
     search = request.args.get('search')
@@ -810,9 +956,11 @@ def exercise_add(): # Updated for Exercise Added
                 type: string
     responses:
         200:
-            description: The exercise is now added
+          description: The exercise is now added
         400:
-            description: There is an invalid input
+          description: There is an invalid input
+        500:
+          description: Error in the database
     """
     db = current_app.extensions['sqlalchemy']
     data = request.get_json()
@@ -880,7 +1028,9 @@ def exercise_remove(exercise_id): # Updated for Exercise Removed
                 type: integer
     responses:
         200:
-            description: The exercise is now removed
+          description: The exercise is now removed
+        500:
+          description: Error in the database
     """
     db = current_app.extensions['sqlalchemy']
     data = request.get_json()
@@ -947,7 +1097,11 @@ def exercise_edit(exercise_id): # Updated for Exercise Edited
                 type: string
     responses:
         200:
-            description: The exercise is now edited
+          description: The exercise is now edited
+        400:
+          description: There is an invalid input
+        500:
+          description: Error in the database
     """
     db = current_app.extensions['sqlalchemy']
     data = request.get_json()
@@ -1014,7 +1168,7 @@ def fetch_users():
           type: string
     responses:
         200:
-            description: Fetches the list of users
+          description: Fetches the list of users
     """
     db = current_app.extensions['sqlalchemy']
     
@@ -1108,32 +1262,29 @@ def platform_metrics():
     ---
     tags:
         - Admin - Platform Metrics
-    description:
-        Retrieves key platform statistics including total users, total subscriptions, 
-        and total revenue generated from coach subscriptions.
     responses:
         200:
-            description: Successfully retrieved platform metrics
-            schema:
+          description: Successfully retrieved platform metrics
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: success
+              data:
                 type: object
                 properties:
-                    status:
-                        type: string
-                        example: success
-                    data:
-                        type: object
-                        properties:
-                            total_users:
-                                type: integer
-                                example: 142
-                            total_subscriptions:
-                                type: integer
-                                example: 38
-                            total_revenue:
-                                type: number
-                                example: 1124.78
+                  total_users:
+                    type: integer
+                    example: 142
+                  total_subscriptions:
+                    type: integer
+                    example: 38
+                  total_revenue:
+                    type: number
+                    example: 1124.78
         500:
-            description: Failed to fetch platform metrics
+          description: Error in the database
     """
     db = current_app.extensions['sqlalchemy']
     
