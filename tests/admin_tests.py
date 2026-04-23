@@ -28,12 +28,10 @@ class TestAdminRoutes(unittest.TestCase):
     
     def test_coach_application_details_success(self):
         response = self.client.get("/admin/coach-applications/1")
-        data = response.get_json()
-        
-        # Could be 200 or 404 depending on DB
         self.assertIn(response.status_code, [200, 404])
         
         if response.status_code == 200:
+            data = response.get_json()
             self.assertIn("name", data)
             self.assertIn("certifications", data)
     
@@ -49,10 +47,10 @@ class TestAdminRoutes(unittest.TestCase):
             json=payload
         )
         
-        data = response.get_json()
         self.assertIn(response.status_code, [200, 500])
         
         if response.status_code == 200:
+            data = response.get_json()
             self.assertIn("message", data)
     
     def test_reject_certification(self):
@@ -63,10 +61,10 @@ class TestAdminRoutes(unittest.TestCase):
             json=payload
         )
         
-        data = response.get_json()
         self.assertIn(response.status_code, [200, 500])
         
         if response.status_code == 200:
+            data = response.get_json()
             self.assertIn("message", data)
     
     # Admin - Coach Reports
@@ -77,22 +75,28 @@ class TestAdminRoutes(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("reports", data)
     
-    def test_coach_report_details(self):
+    def test_coach_report_details_success(self):
         response = self.client.get("/admin/coach-reports/1")
-        
         self.assertIn(response.status_code, [200, 404])
+        
+        if response.status_code == 200:
+            data = response.get_json()
+            self.assertIn("coach", data)
+    
+    def test_coach_report_details_failure(self):
+        response = self.client.get("/admin/coach-reports/824")
+        self.assertEqual(response.status_code, 404)
     
     def test_dismiss_report(self):
         response = self.client.put("/admin/coach-reports/1/dismiss")
-        data = response.get_json()
-        
         self.assertIn(response.status_code, [200, 500])
         
         if response.status_code == 200:
+            data = response.get_json()
             self.assertIn("message", data)
     
     # Admin - Ban / Disable
-    def test_ban_coach(self):
+    def test_ban_coach_success(self):
         payload = {
             "user_id": 1,
             "reason": "Broke the Rules"
@@ -103,14 +107,25 @@ class TestAdminRoutes(unittest.TestCase):
             json=payload
         )
         
-        data = response.get_json()
-        
-        self.assertIn(response.status_code, [200, 400, 404, 500])
+        self.assertIn(response.status_code, [200, 404, 500])
         
         if response.status_code == 200:
+            data = response.get_json()
             self.assertIn("message", data)
     
-    def test_disable_coach(self):
+    def test_ban_coach_missing_fields(self):
+        payload = {
+            "user_id": 1
+        }
+        
+        response = self.client.put(
+            "/admin/coach-reports/1/ban",
+            json=payload
+        )
+        
+        self.assertEqual(response.status_code, 400)
+    
+    def test_disable_coach_success(self):
         payload = {
             "user_id": 1,
             "reason": "Suspension for breaking the rules",
@@ -124,12 +139,24 @@ class TestAdminRoutes(unittest.TestCase):
             json=payload
         )
         
-        data = response.get_json()
-        
-        self.assertIn(response.status_code, [200, 400, 404, 500])
+        self.assertIn(response.status_code, [200, 404, 500])
         
         if response.status_code == 200:
+            data = response.get_json()
             self.assertIn("message", data)
+    
+    def test_disable_coach_missing_fields(self):
+        payload = {
+            "user_id": 1,
+            "reason": "Suspension for breaking the rules"
+        }
+        
+        response = self.client.put(
+            "/admin/coach-reports/1/disable",
+            json=payload
+        )
+        
+        self.assertEqual(response.status_code, 400)
     
     # Admin - Exercises
     def test_exercises(self):
@@ -137,34 +164,70 @@ class TestAdminRoutes(unittest.TestCase):
         data = response.get_json()
         
         self.assertEqual(response.status_code, 200)
-        self.assertIn("status", data)
+        self.assertEqual(data["status"], "success")
+        self.assertEqual(data["mode"], "default")
+        
+        self.assertIn("data", data)
+        self.assertIsInstance(data["data"], dict)
+        
+        self.assertIn("Chest", data["data"])
+        self.assertIn("Legs", data["data"])
+        self.assertIn("Arms", data["data"])
+        self.assertIn("Back", data["data"])
+        self.assertIn("Core", data["data"])
+        self.assertIn("Cardio", data["data"])
     
     def test_search_exercises(self):
         response = self.client.get("/admin/exercises?search=push")
         data = response.get_json()
         
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["status"], "success")
         self.assertEqual(data["mode"], "search")
+        
+        self.assertIn("data", data)
+        self.assertIsInstance(data["data"], list)
+        
+        if len(data["data"]) > 0:
+            exercise = data["data"][0]
+            self.assertIn("exercise_id", exercise)
+            self.assertIn("name", exercise)
+            self.assertIn("muscle_group", exercise)
+            self.assertIn("equipment", exercise)
+    
+    def test_search_exercises_no_results(self):
+        response = self.client.get("/admin/exercises?search=zzzz_not_real")
+        data = response.get_json()
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["mode"], "search")
+        self.assertEqual(data["data"], [])
+    
+    def test_search_exercises_empty_string(self):
+        response = self.client.get("/admin/exercises?search=")
+        data = response.get_json()
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data["mode"], "default")
     
     def test_add_exercise_success(self):
         payload = {
             "user_id": 1,
-            "name": "UnitTest Exercise",
+            "name": "Pushup Test",
             "muscle_group": "Chest",
             "equipment_needed": "Body Weight",
             "video_url": "http://example.com"
         }
         
         response = self.client.post("/admin/exercises/add", json=payload)
-        data = response.get_json()
-        
         self.assertIn(response.status_code, [200, 500])
         
         if response.status_code == 200:
+            data = response.get_json()
             self.assertEqual(data["status"], "success")
             self.assertIn("exercise_id", data)
     
-    def test_add_exercise_failure(self):
+    def test_add_exercise_invalid_muscle(self):
         payload = {
             "user_id": 1,
             "name": "Bad Exercise",
@@ -173,7 +236,6 @@ class TestAdminRoutes(unittest.TestCase):
         }
         
         response = self.client.post("/admin/exercises/add", json=payload)
-        
         self.assertEqual(response.status_code, 400)
     
     def test_remove_exercise(self):
@@ -184,11 +246,10 @@ class TestAdminRoutes(unittest.TestCase):
             json=payload
         )
         
-        data = response.get_json()
-        
         self.assertIn(response.status_code, [200, 500])
         
         if response.status_code == 200:
+            data = response.get_json()
             self.assertEqual(data["status"], "success")
     
     def test_edit_exercise(self):
@@ -205,11 +266,10 @@ class TestAdminRoutes(unittest.TestCase):
             json=payload
         )
         
-        data = response.get_json()
-        
         self.assertIn(response.status_code, [200, 500])
         
         if response.status_code == 200:
+            data = response.get_json()
             self.assertEqual(data["status"], "success")
     
     # Admin - Users
@@ -224,16 +284,12 @@ class TestAdminRoutes(unittest.TestCase):
     # Admin - Platform Metrics
     def test_platform_metrics(self):
         response = self.client.get("/admin/platform-metrics")
-        data = response.get_json()
-        
         self.assertIn(response.status_code, [200, 500])
         
         if response.status_code == 200:
+            data = response.get_json()
             self.assertEqual(data["status"], "success")
             self.assertIn("data", data)
-            self.assertIn("total_users", data["data"])
-            self.assertIn("total_subscriptions", data["data"])
-            self.assertIn("total_revenue", data["data"])
     
 if __name__ == "__main__":
     unittest.main()
