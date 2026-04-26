@@ -12,25 +12,6 @@ MUSCLE_GROUPS = [
 ]
 EQUIPMENTS = ['Machine', 'Free Weight', 'Body Weight']
 
-@admin_bp.route('/admin/test', methods=['GET'])
-def admin_test():
-    """
-    Checks to see if the admin routes are alright
-    ---
-    tags:
-        - Admin - Test
-    responses:
-        200:
-          description: Routes to admin are alright
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Routes to Admin are fine!
-    """
-    return jsonify({"message": "Routes to Admin are fine!"})
-
 # Use Case 5.1 - Verify and Approve Coach Applications / Certifications
 
 @admin_bp.route('/admin/coach-applications', methods=['GET'])
@@ -569,8 +550,10 @@ def coach_report_details(report_id): # Get the information for one Coach Report
                 FROM coach_reports cr
                 JOIN coach_profiles cp ON cr.coach_id = cp.coach_id
                 JOIN user_profiles up ON cp.user_id = up.user_id
-                JOIN coach_reviews crv ON cp.coach_id = crv.coach_id
+                LEFT JOIN coach_reviews crv ON cp.coach_id = crv.coach_id
                 WHERE cr.report_id = :report_id
+                GROUP BY cr.report_id, cr.reason, cr.status, cp.coach_id, cp.pricing, cp.is_active, cp.is_nutritionist, cp.bio,
+                         up.user_id, up.first_name, up.last_name, up.profile_picture_url
                 """
         
         result = db.session.execute(db.text(query), {"report_id": report_id}).fetchone()

@@ -1,5 +1,6 @@
 import unittest
 from app import app
+from user_tests import generate_test_token
 
 # cd workoutworkshop-backend, venv\Scripts\activate
 # coverage run -m unittest tests/admin_tests.py, coverage report
@@ -8,14 +9,6 @@ class TestAdminRoutes(unittest.TestCase):
     def setUp(self):
         app.config["TESTING"] = True
         self.client = app.test_client()
-    
-    # Admin - Test
-    def test_admin_route(self):
-        response = self.client.get("/admin/test")
-        data = response.get_json()
-        
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("message", data)
     
     # Admin - Coach Applications
     def test_coach_applications(self):
@@ -290,6 +283,22 @@ class TestAdminRoutes(unittest.TestCase):
             data = response.get_json()
             self.assertEqual(data["status"], "success")
             self.assertIn("data", data)
-    
+
+    def test_coach_application_details_not_found(self):
+        """Covers 'if not application' branch"""
+        response = self.client.get("/admin/coach-applications/99999")
+        self.assertEqual(response.status_code, 404)
+
+    def test_fetch_users_with_search(self):
+        """Covers the 'IF search' branch in SQL construction"""
+        response = self.client.get("/admin/fetch-users?search=Dylan&page=1&limit=5")
+        self.assertEqual(response.status_code, 200)
+
+    def test_fetch_users_empty_results(self):
+        """Covers the branch where no users match a search"""
+        response = self.client.get("/admin/fetch-users?search=NonExistentUser123")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.get_json()['users']), 0)
+
 if __name__ == "__main__":
     unittest.main()
