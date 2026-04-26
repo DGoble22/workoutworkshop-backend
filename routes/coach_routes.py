@@ -8,13 +8,13 @@ def get_coach_data():
     db = current_app.extensions['sqlalchemy']
     try:
         # Main Query to get coach data
-        query = """SELECT c_p.coach_id, u_p.user_id, u_p.first_name, u_p.last_name, c_p.bio, c_p.is_nutritionist, c_p.is_active, c_p.pricing, u_p.profile_picture_url, AVG(c_r.rating) as rating, c_req.status, u.is_banned, u.is_disabled  
+        query = """SELECT c_p.coach_id, u_p.user_id, u_p.first_name, u_p.last_name, c_p.bio, c_p.is_nutritionist, c_p.is_active, c_p.pricing, u_p.profile_picture_url, AVG(c_r.rating) as rating, cad.decision, u.is_banned, u.is_disabled  
         FROM coach_profiles as c_p
         JOIN user_profiles AS u_p ON c_p.user_ID = u_p.user_id
         join users u on u.User_ID = u_p.user_id
-        join coach_requests c_req on c_req.coach_id = c_p.coach_id
+        join coach_application_decision cad on cad.coach_id = c_p.coach_id
 		left JOIN coach_reviews AS c_r ON c_p.coach_id = c_r.coach_id 
-		where not u.is_banned and not u.is_disabled and c_req.status = 'accepted'
+		where not u.is_banned and not u.is_disabled and cad.decision = 'accepted'
         GROUP BY c_p.coach_id;"""
         coaches = db.session.execute(db.text(query)).fetchall()
         coach_list = [{"Coach ID": c[0], "User ID": c[1], "Name": c[2]+' '+c[3],  "bio": c[4], "is_nutritionist": c[5], "is_active": c[6], "pricing": c[7], "URL": c[8], "rating": c[9]} for c in coaches]
