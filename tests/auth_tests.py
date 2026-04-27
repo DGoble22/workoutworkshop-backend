@@ -1,6 +1,8 @@
+import datetime
 import unittest
 import json
 from io import BytesIO
+
 from app import app
 from sqlalchemy import text, bindparam
 
@@ -89,7 +91,7 @@ class TestAuthRoutes(unittest.TestCase):
         """Test successful login with valid credentials."""
         payload = {
             "username": "Dylan",
-            "password": "$2a$04$Xf.7xYJLXex6FKDugBbl5ugMML6gtN3QlFhFSF1aBPXFetx/.q.9a"
+            "password": "Password1"
         }
         response = self.client.post("/auth/login", json=payload)
         data = response.get_json()
