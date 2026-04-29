@@ -7,6 +7,44 @@ workout_bp = Blueprint('workout', __name__, url_prefix='/api/workouts')
 # fetch list of exercises
 @workout_bp.route('/exercises', methods=['GET'])
 def get_exercises():
+    """
+    Must get all of the available exercises
+    ---
+    tags:
+      - Workout - Exercises
+    responses:
+      200:
+        description: Get the list of exercises
+        schema:
+          type: object
+          properties:
+            status:
+              type: string
+              example: success
+            data:
+              type: array
+              items:
+                type: object
+                properties:
+                  exercise_id:
+                    type: integer
+                    example: 1
+                  name:
+                    type: string
+                    example: Bench Press
+                  muscle_group:
+                    type: string
+                    example: Chest
+                  equipment_needed:
+                    type: string
+                    example: Barbell
+                  video_url:
+                    type: string
+                  thumbnail:
+                    type: string
+      500:
+        description: Error in the database
+    """
     db = current_app.extensions['sqlalchemy']
 
     try:
@@ -32,6 +70,39 @@ def get_exercises():
 # get daily workout plan
 @workout_bp.route('/daily-plan/<int:user_id>/<DOW>', methods=['GET'])
 def get_daily_plan(user_id, DOW):
+    """
+    Must get the user's daily workout plan
+    ---
+    tags:
+      - Workout - Daily Plan
+    parameters:
+      - name: user_id
+        in: path
+        type: integer
+        required: true
+        example: 1
+      - name: DOW
+        in: path
+        type: string
+        required: true
+        example: MON
+    responses:
+      200:
+        description: Get the daily workout plan
+        schema:
+          type: object
+          properties:
+            status:
+              type: string
+            hasPlan:
+              type: boolean
+            data:
+              type: array
+              items:
+                type: object
+      500:
+        description: Error in the database
+    """
     db = current_app.extensions['sqlalchemy']
     dayofweek = str(DOW)
     try:
@@ -76,6 +147,56 @@ def get_daily_plan(user_id, DOW):
 
 @workout_bp.route('/save', methods=['POST'])
 def save_workout():
+    """
+    Must create a new workout plan
+    ---
+    tags:
+      - Workout - Create Plan
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - user_id
+            - date
+            - exercises
+          properties:
+            user_id:
+              type: integer
+              example: 1
+            date:
+              type: string
+              example: MON
+            workout_name:
+              type: string
+              example: Push Day
+            exercises:
+              type: array
+              items:
+                type: object
+                properties:
+                  exercise_id:
+                    type: integer
+                    example: 1
+                  sets:
+                    type: integer
+                    example: 3
+                  reps:
+                    type: integer
+                    example: 15
+                  weight:
+                    type: integer
+                    example: 124
+    responses:
+      201:
+        description: The workout is now saved successfully
+      400:
+        description: Missing Fields
+      500:
+        description: Error in the database
+    """
     db = current_app.extensions['sqlalchemy']
 
     # Get data from Payload
@@ -134,6 +255,23 @@ def save_workout():
 
 @workout_bp.route('/log/<int:user_id>', methods=['GET'])
 def get_workout_log(user_id):
+    """
+    Must get the user's workout history
+    ---
+    tags:
+      - Workout - History
+    parameters:
+      - name: user_id
+        in: path
+        type: integer
+        required: true
+        example: 1
+    responses:
+      200:
+        description: Get the user's workout history
+      500:
+        description: Error in the database
+    """
     db = current_app.extensions['sqlalchemy']
 
     try:
@@ -247,6 +385,23 @@ def remove_exercise_from_log(plan_id, exercise_id):
 # Change '/log/<int:plan_id>' to '/plan/<int:plan_id>'
 @workout_bp.route('/plan/<int:plan_id>', methods=['DELETE'])
 def remove_workout_from_log(plan_id):
+    """
+    Must delete a workout plan
+    ---
+    tags:
+      - Workout - Delete Plan
+    parameters:
+      - name: plan_id
+        in: path
+        type: integer
+        required: true
+        example: 8
+    responses:
+      200:
+        description: The workout plan is now deleted
+      500:
+        description: Error in the database
+    """
     db = current_app.extensions['sqlalchemy']
 
     try:
@@ -278,6 +433,39 @@ def remove_workout_from_log(plan_id):
 # add individual exercise from daily-workout plan
 @workout_bp.route('/add-workout', methods=["POST"])
 def add_workout_to_plan():
+    """
+    Must add a single exercise to the workout plan (creates for not exists)
+    ---
+    tags:
+      - Workout - Add Exercise
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - planned_date
+            - user_id
+            - exercise_id
+          properties:
+            planned_date:
+              type: string
+              example: MON
+            user_id:
+              type: integer
+              example: 1
+            exercise_id:
+              type: integer
+              example: 5
+    responses:
+      200:
+        description: Get exercise added to the workout plan
+      400:
+        description: Missing Fields
+      403:
+        description: Error in adding exercise
+    """
     payload = request.get_json(silent=True) or {}
 
     try:
@@ -334,6 +522,33 @@ def add_workout_to_plan():
 # remove individual exercise from daily-workout plan
 @workout_bp.route('/remove', methods=["POST"])
 def remove_exercise_from_plan():
+    """
+    Must remove an exercise from the workout plan
+    ---
+    tags:
+      - Workout - Remove Exercise
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - plan_id
+            - exercise_id
+          properties:
+            plan_id:
+              type: integer
+              example: 10
+            exercise_id:
+              type: integer
+              example: 3
+    responses:
+      200:
+        description: The exercise is now removed from the workout plan
+      400:
+        description: Missing Data
+    """
     payload = request.get_json(silent=True) or {}
 
     try:
@@ -367,6 +582,44 @@ def remove_exercise_from_plan():
 # update the reps, sets, and weight of a planned exercise
 @workout_bp.route('/update-planned-exercise', methods=["POST"])
 def edit_exercise():
+    """
+    Must update (sets, reps, weight) for the exercise in a plan
+    ---
+    tags:
+      - Workout - Update Exercise
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required:
+            - exercise_id
+            - plan_id
+          properties:
+            exercise_id:
+              type: integer
+              example: 2
+            plan_id:
+              type: integer
+              example: 8
+            reps:
+              type: integer
+              example: 12
+            sets:
+              type: integer
+              example: 4
+            weight:
+              type: integer
+              example: 152
+    responses:
+      200:
+        description: The exercise is now updated
+      400:
+        description: Missing Data
+      403:
+        description: Update Failed
+    """
     payload = request.get_json(silent=True) or {}
 
     try:

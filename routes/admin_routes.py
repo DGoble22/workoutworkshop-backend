@@ -1,6 +1,8 @@
 from math import ceil
 from flask import Blueprint, jsonify, request, current_app
 from sqlalchemy import text
+import os
+from werkzeug.utils import secure_filename
 
 admin_bp = Blueprint('admin_bp', __name__)
 
@@ -11,25 +13,11 @@ MUSCLE_GROUPS = [
     'Quads', 'Calves'
 ]
 EQUIPMENTS = ['Machine', 'Free Weight', 'Body Weight']
+UPLOAD_FOLDER = os.path.join('static', 'workouts')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
-@admin_bp.route('/admin/test', methods=['GET'])
-def admin_test():
-    """
-    Checks to see if the admin routes are alright
-    ---
-    tags:
-        - Admin - Test
-    responses:
-        200:
-          description: Routes to admin are alright
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Routes to Admin are fine!
-    """
-    return jsonify({"message": "Routes to Admin are fine!"})
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Use Case 5.1 - Verify and Approve Coach Applications / Certifications
 
@@ -569,8 +557,10 @@ def coach_report_details(report_id): # Get the information for one Coach Report
                 FROM coach_reports cr
                 JOIN coach_profiles cp ON cr.coach_id = cp.coach_id
                 JOIN user_profiles up ON cp.user_id = up.user_id
-                JOIN coach_reviews crv ON cp.coach_id = crv.coach_id
+                LEFT JOIN coach_reviews crv ON cp.coach_id = crv.coach_id
                 WHERE cr.report_id = :report_id
+                GROUP BY cr.report_id, cr.reason, cr.status, cp.coach_id, cp.pricing, cp.is_active, cp.is_nutritionist, cp.bio,
+                         up.user_id, up.first_name, up.last_name, up.profile_picture_url
                 """
         
         result = db.session.execute(db.text(query), {"report_id": report_id}).fetchone()
@@ -926,7 +916,7 @@ def exercises(): # Search by Name or Shows the Default List
     })
 
 @admin_bp.route('/admin/exercises/add', methods=['POST'])
-def exercise_add(): # Updated for Exercise Added
+def add_exercise():
     """
     Choosing to add a new exercise
     ---
@@ -963,46 +953,44 @@ def exercise_add(): # Updated for Exercise Added
           description: Error in the database
     """
     db = current_app.extensions['sqlalchemy']
-    data = request.get_json()
-    admin_id = data.get("user_id")
-    name = data.get("name")
-    muscle_group = data.get("muscle_group")
-    equipment = data.get("equipment_needed")
-    video_url = data.get("video_url")
-    thumb_url = data.get("thumb_url")
-    
-    if not all([admin_id, name, muscle_group, equipment]):
-        return jsonify({"error": "admin_id, name, muscle_group, and equipment are required"}), 400
-    
-    if muscle_group not in MUSCLE_GROUPS:
-        return jsonify({"error": "Invalid Muscle Groups"}), 400
-    
-    if equipment not in EQUIPMENTS:
-        return jsonify({"error": "Invalid Equipments"}), 400
-    
+    # 1. Read the standard text fields from Form Data instead of JSON
+    user_id = request.form.get('user_id')
+    name = request.form.get('name')
+    muscle_group = request.form.get('muscle_group')
+    equipment_needed = request.form.get('equipment_needed')
+    video_url = request.form.get('video_url')
+
+    # 2. Handle the file upload
+    thumb_url = None
+    if 'thumbnail' in request.files:
+        file = request.files['thumbnail']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            target_path = os.path.join(current_app.root_path, UPLOAD_FOLDER)
+            os.makedirs(target_path, exist_ok=True)  # Creates the folder if it doesn't exist
+
+            save_path = os.path.join(target_path, filename)
+            file.save(save_path)
+            # The exact string saved to the database:
+            thumb_url = f"http://127.0.0.1:5000/static/workouts/{filename}"
+
     try:
-        query_exercise = """
-                         INSERT INTO exercises (name, muscle_group, equipment_needed, video_url, thumbnail)
-                         VALUES (:name, :muscle_group, :equipment, :video_url, :thumb_url)
-                         """
-        
-        result = db.session.execute(db.text(query_exercise), {"name": name, "muscle_group": muscle_group, "equipment": equipment, "video_url": video_url, "thumb_url": thumb_url})
-        exercise_id = result.lastrowid
-        
-        query_change = """
-                       INSERT INTO exercise_changes (admin_id, exercise_id, event)
-                       VALUES (:admin_id, :exercise_id, 'add')
-                       """
-        
-        db.session.execute(db.text(query_change), {"admin_id": admin_id, "exercise_id": exercise_id})
-        db.session.commit()
-        
-        return jsonify({
-            "status": "success",
-            "message": "Exercise Added Successfully",
-            "exercise_id": exercise_id
+        # 3. Your original SQL insert logic
+        sql = text("""
+            INSERT INTO exercises (name, muscle_group, equipment_needed, video_url, thumbnail) 
+            VALUES (:name, :muscle_group, :equipment_needed, :video_url, :thumb_url)
+        """)
+
+        db.session.execute(sql, {
+            "name": name,
+            "muscle_group": muscle_group,
+            "equipment_needed": equipment_needed,
+            "video_url": video_url,
+            "thumb_url": thumb_url
         })
-    
+        db.session.commit()
+        return jsonify({"message": "Exercise added successfully!"}), 201
+
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
@@ -1063,86 +1051,93 @@ def exercise_remove(exercise_id): # Updated for Exercise Removed
         return jsonify({"error": str(e)}), 500
 
 @admin_bp.route('/admin/exercises/update/<int:exercise_id>', methods=['PUT'])
-def exercise_edit(exercise_id): # Updated for Exercise Edited
+def update_exercise(exercise_id):
     """
-    Choosing to edit an exercise
-    ---
-    tags:
-        - Admin - Exercises
-    parameters:
-        - name: exercise_id
-          in: path
-          type: integer
-          required: true
-        - in: body
-          name: body
-          required: true
-          schema:
-            type: object
-            required:
-              - user_id
-              - name
-              - muscle_group
-              - equipment_needed
-            properties:
-              user_id:
-                type: integer
-              name:
-                type: string
-              muscle_group:
-                type: string
-              equipment_needed:
-                type: string
-              video_url:
-                type: string
-    responses:
-        200:
-          description: The exercise is now edited
-        400:
-          description: There is an invalid input
-        500:
-          description: Error in the database
-    """
+        Choosing to edit an exercise
+        ---
+        tags:
+            - Admin - Exercises
+        parameters:
+            - name: exercise_id
+              in: path
+              type: integer
+              required: true
+            - in: body
+              name: body
+              required: true
+              schema:
+                type: object
+                required:
+                  - user_id
+                  - name
+                  - muscle_group
+                  - equipment_needed
+                properties:
+                  user_id:
+                    type: integer
+                  name:
+                    type: string
+                  muscle_group:
+                    type: string
+                  equipment_needed:
+                    type: string
+                  video_url:
+                    type: string
+        responses:
+            200:
+              description: The exercise is now edited
+            400:
+              description: There is an invalid input
+            500:
+              description: Error in the database
+        """
     db = current_app.extensions['sqlalchemy']
-    data = request.get_json()
-    admin_id = data.get("user_id")
-    name = data.get("name")
-    muscle_group = data.get("muscle_group")
-    equipment = data.get("equipment_needed")
-    video_url = data.get("video_url")
-    thumb_url = data.get("thumb_url")
-    
-    if not all([admin_id, name, muscle_group, equipment]):
-        return jsonify({"error": "admin_id, name, muscle_group, and equipment are required"}), 400
-    
-    if muscle_group not in MUSCLE_GROUPS:
-        return jsonify({"error": "Invalid Muscle Groups"}), 400
-    
-    if equipment not in EQUIPMENTS:
-        return jsonify({"error": "Invalid Equipments"}), 400
-    
+
+    # 1. Read the standard text fields
+    user_id = request.form.get('user_id')
+    name = request.form.get('name')
+    muscle_group = request.form.get('muscle_group')
+    equipment_needed = request.form.get('equipment_needed')
+    video_url = request.form.get('video_url')
+
+    # 2. Handle the file upload
+    thumb_url = None
+    if 'thumbnail' in request.files:
+        file = request.files['thumbnail']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            target_path = os.path.join(current_app.root_path, UPLOAD_FOLDER)
+            os.makedirs(target_path, exist_ok=True)
+
+            save_path = os.path.join(target_path, filename)
+            file.save(save_path)
+            thumb_url = f"http://127.0.0.1:5000/static/workouts/{filename}"
+
+    if not thumb_url:
+        thumb_url = request.form.get('thumb_url')
+
     try:
-        query_exercise = """
-                         UPDATE exercises
-                         SET name = :name, muscle_group = :muscle_group, equipment_needed = :equipment_needed, video_url = :video_url, thumbnail = :thumb_url
-                         WHERE exercise_id = :exercise_id
-                         """
-        
-        db.session.execute(db.text(query_exercise), {"exercise_id": exercise_id, "name": name, "muscle_group": muscle_group, "equipment_needed": equipment, "video_url": video_url, "thumb_url": thumb_url})
-        
-        query_change = """
-                       INSERT INTO exercise_changes (admin_id, exercise_id, event)
-                       VALUES (:admin_id, :exercise_id, 'edit')
-                       """
-        
-        db.session.execute(db.text(query_change), {"admin_id": admin_id, "exercise_id": exercise_id})
-        db.session.commit()
-        
-        return jsonify({
-            "status": "success",
-            "message": "Exercise Edited Successfully"
+        # 3. Your original SQL update logic
+        # Using COALESCE so if they don't upload a new image, it keeps the old one!
+        sql = text("""
+            UPDATE exercises 
+            SET name = :name, muscle_group = :muscle_group, 
+                equipment_needed = :equipment_needed, video_url = :video_url, 
+                thumbnail = COALESCE(:thumb_url, thumbnail)
+            WHERE exercise_id = :exercise_id
+        """)
+
+        db.session.execute(sql, {
+            "name": name,
+            "muscle_group": muscle_group,
+            "equipment_needed": equipment_needed,
+            "video_url": video_url,
+            "thumb_url": thumb_url,
+            "exercise_id": exercise_id
         })
-    
+        db.session.commit()
+        return jsonify({"status": "success", "message": "Exercise updated successfully!"}), 200
+
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
