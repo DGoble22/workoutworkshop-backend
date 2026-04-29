@@ -1,1 +1,19 @@
 .env
+__pycache__
+/venv
+
+
+venv/
+__pycache__/
+*.pyc
+.coverage
+
+#IDE files
+.idea/
+
+#Picture files
+uploads/
+*.jpg
+*.jpeg
+*.png
+*.gif
