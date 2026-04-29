@@ -591,3 +591,20 @@ def delete_workout_plan(plan_id):
     except Exception as e:
         session.rollback()
         return jsonify({'status': 'error', 'message': str(e)}), 500
+    
+@coach_bp.route('/my-coach/<int:user_id>', methods=['GET'])
+def get_user_coach(user_id):
+    db = current_app.extensions['sqlalchemy']
+    try:
+        result = db.session.execute(
+            db.text("""
+                SELECT cs.coach_id FROM coach_subscriptions cs
+                WHERE cs.user_id = :uid LIMIT 1
+            """),
+            {"uid": user_id}
+        ).fetchone()
+        if not result:
+            return jsonify({"status": "success", "coach_id": None}), 200
+        return jsonify({"status": "success", "coach_id": result[0]}), 200
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
