@@ -142,11 +142,11 @@ class TestCoachRoutes(unittest.TestCase):
                 {"dow": "M", "meal": "banana"}
             ]
         }
-        response = self.client.post('/coach/meal-plan/1/1', json=payload)
+        response = self.client.post('/coach/save-meal-plan/1/1', json=payload)
         self.assertIn(response.status_code, [200, 500])
 
     def test_post_meal_plan_no_meals(self):
-        response = self.client.post('/coach/meal-plan/1/1', json={})
+        response = self.client.post('/coach/save-meal-plan/1/1', json={})
         self.assertEqual(response.status_code, 400)
     
     #Coach Profile
