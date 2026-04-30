@@ -120,7 +120,7 @@ def login():
             'FROM User_login ul '
             'JOIN Users u ON ul.User_id = u.User_id '
             'JOIN User_Profiles up ON u.User_id = up.user_id '
-            'LEFT JOIN goals g ON g.user_id = u.user_id '
+            'LEFT JOIN Goals g ON g.user_id = u.user_id '
             'WHERE ul.username = :username '
             'LIMIT 1'
         )
