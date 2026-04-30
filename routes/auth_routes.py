@@ -517,7 +517,7 @@ def register():
         #insert goals
         session.execute(
             text(
-                'INSERT INTO goals '
+                'INSERT INTO Goals '
                 '(user_id, goal_weight, goal_type, information) '
                 'VALUES (:uid, :fn, :ln, :goal_text)'
             ),
