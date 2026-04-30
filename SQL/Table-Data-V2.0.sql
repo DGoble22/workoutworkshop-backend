@@ -1116,7 +1116,20 @@ VALUES
     ('Curls', 'Arms', 'Free Weight', 0, 'https://youtu.be/6DeLZ6cbgWQ?si=vYmm8KP-UMPasG81', 'http://127.0.0.1:5000/static/workouts/curls.jpg'),
     ('Skull Crushers', 'Arms', 'Free Weight', 0, 'https://youtu.be/GaK2da6B2zM?si=H8wjnsWGOiIm_JnU', 'http://127.0.0.1:5000/static/workouts/skullcrushers.jpg'),
     ('Cable Extensions', 'Arms', 'Machine', 0, 'https://youtu.be/JDEDaZTEzGE?si=JLtn1lNg7wkZhex-', 'http://127.0.0.1:5000/static/workouts/cableextensions.jpg'),
-    ('Pull up', 'Back', 'Body Weight', 0, 'https://youtu.be/Q_7jVfN4FRQ?si=QnpFpfvx-DkS7rH6', 'http://127.0.0.1:5000/static/workouts/pullup.jpg');
+    ('Pull up', 'Back', 'Body Weight', 0, 'https://youtu.be/Q_7jVfN4FRQ?si=QnpFpfvx-DkS7rH6', 'http://127.0.0.1:5000/static/workouts/pullup.jpg'),
+    ('Incline Dumbbell Press', 'Chest', 'Free Weight', 0, 'https://youtu.be/8iPEnn-ltC8?si=wdu53aHMtvw-2vE3', 'http://127.0.0.1:5000/static/workouts/inclinedumbbellpress.jpg'),
+    ('Overhead Press', 'Arms', 'Free Weight', 0, 'https://youtu.be/2yjwXTZQDDI?si=g7w7qTnHbrhCfPip', 'http://127.0.0.1:5000/static/workouts/overheadpress.jpg'),
+    ('Tricep Pushdown', 'Arms', 'Machine', 0, 'https://youtu.be/2-LAMcpzODU?si=yUboMnb-IgxNcOWz', 'http://127.0.0.1:5000/static/workouts/triceppushdown.jpg'),
+    ('Deadlift', 'Back', 'Free Weight', 0, 'https://youtu.be/r4MzxtBKyNE?si=Oh8IQBPPZR3RPiGl', 'http://127.0.0.1:5000/static/workouts/deadlift.jpg'),
+    ('Barbell Row', 'Back', 'Free Weight', 0, 'https://youtu.be/9efgcAjQe7E?si=YYln5I7Pq2qogpX7', 'http://127.0.0.1:5000/static/workouts/barbellrow.jpg'),
+    ('Romanian Deadlift (RDL)', 'Legs', 'Free Weight', 0, 'https://youtu.be/FQKfr1YDhEk?si=B5Cxnbo8kk849seI', 'http://127.0.0.1:5000/static/workouts/romaniandeadlift.jpg'),
+    ('Leg Press', 'Legs', 'Machine', 0, 'https://youtu.be/IZxyjW7MPJQ?si=WEp-tZ_CcqFGlCYs', 'http://127.0.0.1:5000/static/workouts/legpress.jpg'),
+    ('Calf Raises', 'Legs', 'Free Weight', 0, 'https://youtu.be/SRUtMJ0tE2A?si=gHL1BESMEkbZ0Sy-', 'http://127.0.0.1:5000/static/workouts/calfraises.jpg'),
+    ('Chest Flies', 'Chest', 'Free Weight', 0, 'https://youtu.be/eozdVDA78K0?si=1wd_XgvD0le6odfW', 'http://127.0.0.1:5000/static/workouts/chestflies.jpg'),
+    ('Overhead Tricep Extension', 'Arms', 'Free Weight', 0, 'https://youtu.be/-Vyt2QdsR7E?si=5s4ud7sgOaJhIZgz', 'http://127.0.0.1:5000/static/workouts/overheadtricepextension.jpg'),
+    ('Lateral Raises', 'Arms', 'Free Weight', 0, 'https://youtu.be/3VcKaXpzqRo?si=SvCUfelloF9-TBSB', 'http://127.0.0.1:5000/static/workouts/lateralraises.jpg'),
+    ('Cable Row', 'Back', 'Machine', 0, 'https://youtu.be/GZbfZ033f74?si=dCtaW-aBX0FjwqQD', 'http://127.0.0.1:5000/static/workouts/cablerow.jpg'),
+    ('Preacher Curls', 'Arms', 'Free Weight', 0, 'https://youtu.be/02TvQZiVdic?si=M1U5UopmHc0d6W4u', 'http://127.0.0.1:5000/static/workouts/preachercurls.jpg');
 
 use GroupProject;
 
