@@ -952,7 +952,7 @@ def add_exercise():
           201:
             description: Exercise added successfully
           500:
-            description: Database error or invalid file format
+            description: Error in the database or invalid file format
         """
     db = current_app.extensions['sqlalchemy']
     # 1. Read the standard text fields from Form Data instead of JSON
@@ -998,7 +998,7 @@ def add_exercise():
         return jsonify({"error": str(e)}), 500
 
 @admin_bp.route('/admin/exercises/remove/<int:exercise_id>', methods=['DELETE'])
-def exercise_remove(exercise_id): # Updated for Exercise Removed
+def exercise_remove(exercise_id): # Updated for Exercise Removed ???
     """
         Remove an exercise from the database
         ---
@@ -1015,7 +1015,7 @@ def exercise_remove(exercise_id): # Updated for Exercise Removed
           404:
             description: Exercise not found
           500:
-            description: Database error
+            description: Error in the database
         """
     db = current_app.extensions['sqlalchemy']
     data = request.get_json()
@@ -1081,7 +1081,7 @@ def update_exercise(exercise_id):
       200:
         description: Exercise updated successfully
       500:
-        description: Database error
+        description: Error in the database
     """
     db = current_app.extensions['sqlalchemy']
 

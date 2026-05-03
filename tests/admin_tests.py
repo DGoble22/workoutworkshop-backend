@@ -2,8 +2,6 @@ import unittest
 from app import app
 from user_tests import generate_test_token
 
-# cd workoutworkshop-backend, venv\Scripts\activate
-# coverage run -m unittest tests/admin_tests.py, coverage report
 class TestAdminRoutes(unittest.TestCase):
     
     def setUp(self):
@@ -212,8 +210,7 @@ class TestAdminRoutes(unittest.TestCase):
             "equipment_needed": "Body Weight",
             "video_url": "http://example.com"
         }
-
-        # Send as Form Data (data=) to match the React frontend
+        
         response = self.client.post("/admin/exercises/add", data=payload)
         self.assertIn(response.status_code, [200, 201])
 
@@ -228,8 +225,7 @@ class TestAdminRoutes(unittest.TestCase):
             "muscle_group": "Invalid",
             "equipment_needed": "Body Weight"
         }
-
-        # Send as Form Data. DB will reject the invalid muscle, triggering your except block (500)
+        
         response = self.client.post("/admin/exercises/add", data=payload)
         self.assertEqual(response.status_code, 500)
     
