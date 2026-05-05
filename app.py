@@ -19,15 +19,17 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 socketio = SocketIO(app, cors_allowed_origins="*")
 Swagger(app)
 
-# DB Config
-db_user = os.getenv('DB_USER')
-db_password = os.getenv('DB_PASSWORD')
-db_host = os.getenv('DB_HOST')
-db_port = os.getenv('DB_PORT', '24183')
-db_name = os.getenv('DB_NAME')
+database_url = os.getenv('DATABASE_URL')
+if not database_url:
+    raise ValueError("No DATABASE_URL set for Flask application")
 
-app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+pymysql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET', 'change-me-in-production')
+
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    "pool_recycle": 280,   # Refresh connections every 280 seconds
+    "pool_pre_ping": True  # Test connection health before sending queries
+}
 
 db = SQLAlchemy(app)
 

@@ -296,24 +296,25 @@ def get_workout_log(user_id):
         # Group exercises by workout plan using a dictionary, then convert back to list for frontend
         workouts_dict = {}
         for row in result:
-            plan_id = row['id']
+            plan_id = row.get('id', row.get('plan_id'))
+
             if plan_id not in workouts_dict:
                 workouts_dict[plan_id] = {
                     'id': plan_id,
-                    'date': row['date'],
-                    'title': row['title'],
+                    'date': row.get('date', row.get('planned_date')),
+                    'title': row.get('title'),
                     'exercises': []
                 }
 
             # If this workout has exercises attached, append them to the list
-            if row['exercise_id']:
+            if row.get('exercise_id'):
                 workouts_dict[plan_id]['exercises'].append({
-                    'exercise_id': row['exercise_id'],
-                    'exercise_name': row['exercise_name'],
-                    'sets': row['sets'],
-                    'reps': row['reps'],
-                    'weight': row['weight'],
-                    'completed': row['completed']
+                    'exercise_id': row.get('exercise_id'),
+                    'exercise_name': row.get('exercise_name', row.get('name')),
+                    'sets': row.get('sets'),
+                    'reps': row.get('reps'),
+                    'weight': row.get('weight'),
+                    'completed': row.get('completed')
                 })
 
         # Convert dictionary back to a list for the frontend
