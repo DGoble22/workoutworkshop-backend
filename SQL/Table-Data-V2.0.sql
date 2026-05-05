@@ -1108,7 +1108,7 @@ INSERT INTO exercises (name, muscle_group, equipment_needed, is_removed, video_u
 VALUES
     ('Bench Press', 'Chest', 'Free Weight', 0, 'https://youtu.be/SCVCLChPQFY?si=0jJ1gaYEiZaFUuTp', 'https://workoutworkshop-backend.onrender.com/static/workouts/benchpress.jpg'),
     ('Push Up', 'Chest', 'Body Weight', 0, 'https://youtu.be/WDIpL0pjun0?si=qJeorvjT1FngIn3a', 'https://workoutworkshop-backend.onrender.com/static/workouts/pushups.jpg'),
-    ('Squat', 'Legs', 'Free Weight', 0, 'https://youtu.be/xqvCmoLULNY?si=wh9BbM8pCWEzP-nw', 'https://workoutworkshop-backend.onrender.com/static/workouts/squat.jpg'),
+    ('Barbell Squat', 'Legs', 'Free Weight', 0, 'https://youtu.be/xqvCmoLULNY?si=wh9BbM8pCWEzP-nw', 'https://workoutworkshop-backend.onrender.com/static/workouts/squat.jpg'),
     ('Crunches', 'Core', 'Body Weight', 0, 'https://youtu.be/9T4WQGlKCRk?si=5Drr5v8w1djOUhQn', 'https://workoutworkshop-backend.onrender.com/static/workouts/crunches.jpg'),
     ('Jogging', 'Cardio', 'Machine', 0, 'https://youtu.be/P8fmIvqQEf4?si=RmbqI5mqI-ZQcV72', 'https://workoutworkshop-backend.onrender.com/static/workouts/jogging.jpg'),
     ('Shoulder Press', 'Arms', 'Free Weight', 0, 'https://youtu.be/0JfYxMRsUCQ?si=BBQ5voUFpbwdEMQH', 'https://workoutworkshop-backend.onrender.com/static/workouts/shoulderpress.jpg'),
