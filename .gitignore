@@ -17,3 +17,9 @@ uploads/
 *.jpeg
 *.png
 *.gif
+
+# EXCEPT the static workout thumbnails we need for the app!
+!static/workouts/*.jpg
+!static/workouts/*.jpeg
+!static/workouts/*.png
+!static/workouts/*.gif
