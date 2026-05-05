@@ -21,15 +21,17 @@ Swagger(app)
 
 database_url = os.getenv('DATABASE_URL')
 if not database_url:
-    raise ValueError("No DATABASE_URL set for Flask application")
+    print("No DATABASE_URL found. Falling back to in-memory SQLite for testing.")
+    database_url = 'sqlite:///:memory:'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET', 'change-me-in-production')
 
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    "pool_recycle": 280,   # Refresh connections every 280 seconds
-    "pool_pre_ping": True  # Test connection health before sending queries
-}
+if "sqlite" not in database_url:
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        "pool_recycle": 280,
+        "pool_pre_ping": True
+    }
 
 db = SQLAlchemy(app)
 
