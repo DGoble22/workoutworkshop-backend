@@ -117,9 +117,9 @@ def login():
             'u.role, u.is_banned, u.is_disabled, u.create_date, '
             'up.first_name, up.last_name, up.birthday, up.profile_picture_url, up.current_weight, '
             'g.goal_weight, g.goal_type, g.information '
-            'FROM User_login ul '
-            'JOIN Users u ON ul.User_id = u.User_id '
-            'JOIN User_Profiles up ON u.User_id = up.user_id '
+            'FROM user_login ul '
+            'JOIN users u ON ul.user_id = u.user_id '
+            'JOIN user_profiles up ON u.user_id = up.user_id '
             'LEFT JOIN goals g ON g.user_id = u.user_id '
             'WHERE ul.username = :username '
             'LIMIT 1'
@@ -201,7 +201,7 @@ def checkusername():
     try:
         sql = text(
             'SELECT 1 '
-            'FROM User_login ul '
+            'FROM user_login ul '
             'WHERE ul.username = :username '
             'LIMIT 1'
         )
@@ -462,7 +462,7 @@ def register():
     try:
         # 1. Check username is not already taken
         taken = session.execute(
-            text('SELECT 1 FROM User_login WHERE username = :u LIMIT 1'),
+            text('SELECT 1 FROM user_login WHERE username = :u LIMIT 1'),
             {'u': username}
         ).first()
         if taken:
@@ -471,31 +471,31 @@ def register():
                 'message': 'Username is already taken.'
             }), 409
 
-        # 2. Insert into Users — role based on is_coach flag
+        # 2. Insert into users — role based on is_coach flag
         role = 'C' if is_coach else 'U'
         session.execute(
             text(
-                'INSERT INTO Users (role, is_banned, is_disabled, create_date) '
+                'INSERT INTO users (role, is_banned, is_disabled, create_date) '
                 'VALUES (:role, 0, 0, NOW())'
             ),
             {'role': role}
         )
         user_id = session.execute(text('SELECT LAST_INSERT_ID()')).scalar()
 
-        # 3. Insert into User_login
+        # 3. Insert into user_login
         password_hash = generate_password_hash(password)
         session.execute(
             text(
-                'INSERT INTO User_login (user_id, username, password_hash) '
+                'INSERT INTO user_login (user_id, username, password_hash) '
                 'VALUES (:uid, :username, :pw)'
             ),
             {'uid': user_id, 'username': username, 'pw': password_hash}
         )
 
-        # 4. Insert into User_Profiles
+        # 4. Insert into user_profiles
         session.execute(
             text(
-                'INSERT INTO User_Profiles '
+                'INSERT INTO user_profiles '
                 '(user_id, first_name, last_name, birthday, current_weight) '
                 'VALUES (:uid, :fn, :ln, :bday, :cw)'
             ),
@@ -517,7 +517,7 @@ def register():
         #insert goals
         session.execute(
             text(
-                'INSERT INTO Goals '
+                'INSERT INTO goals '
                 '(user_id, goal_weight, goal_type, information) '
                 'VALUES (:uid, :fn, :ln, :goal_text)'
             ),
@@ -529,11 +529,11 @@ def register():
             }
         )
 
-        # 5. If coach, insert into Coach_Profiles
+        # 5. If coach, insert into coach_profiles
         if is_coach:
             session.execute(
                 text(
-                    'INSERT INTO Coach_Profiles '
+                    'INSERT INTO coach_profiles '
                     '(user_id, pricing, bio, is_active, is_nutritionist) '
                     'VALUES (:uid, :price, :bio, :is_active, :is_nutritionist)'
                 ),
@@ -552,7 +552,7 @@ def register():
                 for slot in availability:
                     session.execute(
                         text(
-                            'INSERT INTO Coach_Availability '
+                            'INSERT INTO coach_availability '
                             '(coach_id, DOW, start_time, end_time) '
                             'VALUES (:cid, :dow, :start, :end)'
                         ),
@@ -572,7 +572,7 @@ def register():
             session.execute(
                 text(
                     'INSERT INTO payment_details '
-                    '(user_id, card_num, exp_month, exp_year, CVV) '
+                    '(user_id, card_num, exp_month, exp_year, cvv) '
                     'VALUES (:uid, :number, :exp_month ,:exp_year, :cvc)'
                 ),
                 {
@@ -614,9 +614,9 @@ def register():
                 'u.role, u.is_banned, u.is_disabled, u.create_date, '
                 'up.first_name, up.last_name, up.birthday, up.profile_picture_url, up.current_weight, '
                 'g.goal_weight, g.goal_type, g.information '
-                'FROM User_login ul '
-                'JOIN Users u ON ul.User_id = u.User_id '
-                'JOIN User_Profiles up ON u.User_id = up.user_id '
+                'FROM user_login ul '
+                'JOIN users u ON ul.user_id = u.user_id '
+                'JOIN user_profiles up ON u.user_id = up.user_id '
                 'LEFT JOIN goals g ON g.user_id = u.user_id '
                 'WHERE ul.user_id = :uid '
                 'LIMIT 1'
@@ -703,7 +703,7 @@ def changePassword():
         sql = text(
             'SELECT '
             'ul.user_id, ul.password_hash '
-            'FROM User_login ul '
+            'FROM user_login ul '
             'WHERE ul.user_id = :user_id '
             'LIMIT 1'
         )
@@ -733,7 +733,7 @@ def changePassword():
     try:
         new_password_hash = generate_password_hash(new_password)
         db.session.execute(
-            text('UPDATE User_login SET password_hash = :pw WHERE user_id = :uid'),
+            text('UPDATE user_login SET password_hash = :pw WHERE user_id = :uid'),
             {'pw': new_password_hash, 'uid': user_id}
         )
         db.session.commit()

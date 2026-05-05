@@ -37,8 +37,8 @@ drop table if exists users;
 -- user tables
 -- creates the overall parent user table
 
-create table Users(
-                      User_ID integer auto_increment not null,
+create table users(
+                      user_id integer auto_increment not null,
                       role ENUM('A', 'C', 'U') default 'U' not null, -- A: admin, C: Coach, U: User
                       is_banned boolean default false, -- determine if account is banned
                       is_disabled boolean default false, -- determine if account is disabled
@@ -49,7 +49,7 @@ create table Users(
 
 -- store user login credentials
 
-create table User_login(
+create table user_login(
                            username varchar(32) not null, -- username for user
                            password_hash varchar(255) not null, -- user pass word
                            user_id integer, -- link login with users
@@ -59,19 +59,19 @@ create table User_login(
 
 -- Defines the users goals
 
-create table Goals(
-                      User_ID integer not null,
+create table goals(
+                      user_id integer not null,
                       goal_weight float not null, -- the targer weight of the user
                       goal_type ENUM('Strength', 'Weightloss', 'Stamina'), -- pre determined goals
-                      Information text,
+                      information text,
                       last_update datetime default CURRENT_TIMESTAMP,
-                      primary key(User_id),
+                      primary key(user_id),
                       foreign key (user_id) references users(user_id)
 );
 
 -- displayable information user profile information
 
-create table User_Profiles(
+create table user_profiles(
                               user_id integer not null,
                               first_name varchar(16) not null,
                               last_name varchar(16) not null,
@@ -99,7 +99,7 @@ create table weight_logs (
 create table payment_details(
                                 user_id integer not null,
                                 card_num varchar(32) not null,
-                                CVV integer not null,
+                                cvv integer not null,
                                 exp_month integer not null, -- experation month
                                 exp_year integer not null, -- experation year
                                 create_date datetime default CURRENT_TIMESTAMP,
@@ -109,13 +109,13 @@ create table payment_details(
 );
 
 -- store user progress pictures
-create table Progress_Pictures(
+create table progress_pictures(
                                   picture_id integer auto_increment not null,
                                   user_id integer not null,
                                   image_url text not null,
                                   create_date datetime default CURRENT_TIMESTAMP,
                                   primary key (picture_id),
-                                  foreign key (user_id) references Users(user_id) ON DELETE CASCADE
+                                  foreign key (user_id) references users(user_id) ON DELETE CASCADE
 );
 
 
@@ -123,7 +123,7 @@ create table Progress_Pictures(
 
 -- define coach profile
 
-create table Coach_Profiles(
+create table coach_profiles(
                                coach_id integer auto_increment not null,
                                user_id integer not null, -- coaches are also users so they get a user_id
                                bio text,
@@ -133,7 +133,7 @@ create table Coach_Profiles(
                                create_date datetime default CURRENT_TIMESTAMP,
                                last_update datetime default CURRENT_TIMESTAMP,
                                primary key (coach_id),
-                               foreign key (user_id) references Users(user_id)
+                               foreign key (user_id) references users(user_id)
 );
 
 create table coach_availability(
@@ -150,7 +150,7 @@ create table coach_availability(
 
 -- store user daily surveys
 
-create table Daily_Survey(
+create table daily_survey(
                              survey_id integer auto_increment not null,
                              user_id integer not null, -- link survey to user
                              result integer not null, -- 1-5
@@ -161,7 +161,7 @@ create table Daily_Survey(
 
 -- store user to coach applications
 
-create table Coach_requests(
+create table coach_requests(
                                request_id integer auto_increment not null,
                                user_id integer not null, -- link to coach
                                coach_id integer not null, -- link to coach getting requested
@@ -187,7 +187,7 @@ create table coach_subscriptions(
 
 -- store reviews of a coach
 
-create table Coach_reviews(
+create table coach_reviews(
                               review_id integer auto_increment not null,
                               user_id integer, -- users that wrote review
                               coach_id integer not null, -- coach that the review is on

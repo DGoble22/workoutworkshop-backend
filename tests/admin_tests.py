@@ -267,7 +267,7 @@ class TestAdminRoutes(unittest.TestCase):
             data = response.get_json()
             self.assertEqual(data["status"], "success")
     
-    # Admin - Users
+    # Admin - users
     def test_fetch_users(self):
         response = self.client.get("/admin/fetch-users")
         data = response.get_json()

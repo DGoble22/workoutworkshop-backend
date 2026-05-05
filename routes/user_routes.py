@@ -115,7 +115,7 @@ def upload_profile_picture():
         db = current_app.extensions['sqlalchemy']
         try:
             db.session.execute(
-                text('UPDATE User_Profiles SET profile_picture_url = :url WHERE user_id = :uid'),
+                text('UPDATE user_profiles SET profile_picture_url = :url WHERE user_id = :uid'),
                 {'url': file_url, 'uid': user_id}
             )
             db.session.commit()
@@ -190,7 +190,7 @@ def update_username():
     try:
         # Check if username already exists
         existing_user = db.session.execute(
-            text('SELECT user_id FROM User_login WHERE username = :uname AND user_id != :uid'),
+            text('SELECT user_id FROM user_login WHERE username = :uname AND user_id != :uid'),
             {'uname': new_username, 'uid': user_id}
         ).fetchone()
 
@@ -199,7 +199,7 @@ def update_username():
                 {'status': 'error', 'message': 'That username is already taken. Please choose another.'}), 409
 
         db.session.execute(
-            text('UPDATE User_login SET username = :uname WHERE user_id = :uid'),
+            text('UPDATE user_login SET username = :uname WHERE user_id = :uid'),
             {'uname': new_username, 'uid': user_id}
         )
         db.session.commit()
@@ -222,7 +222,7 @@ def update_goals():
     Must update the user's fitness goals and weight
     ---
     tags:
-        - User - Goals
+        - User - goals
     parameters:
         - name: authorization
           in: header
@@ -283,7 +283,7 @@ def update_goals():
 
     try:
         db.session.execute(
-            text("""UPDATE User_Profiles SET current_weight = :cw WHERE user_id = :uid"""),
+            text("""UPDATE user_profiles SET current_weight = :cw WHERE user_id = :uid"""),
             {'cw': current_weight, 'uid': user_id}
         )
 
@@ -365,10 +365,10 @@ def delete_account():
     try:
         # Delete from child tables
         db.session.execute(text('DELETE FROM goals WHERE user_id = :uid'), {'uid': user_id})
-        db.session.execute(text('DELETE FROM User_Profiles WHERE user_id = :uid'), {'uid': user_id})
+        db.session.execute(text('DELETE FROM user_profiles WHERE user_id = :uid'), {'uid': user_id})
 
         #Delete from parent table
-        db.session.execute(text('DELETE FROM User_login WHERE user_id = :uid'), {'uid': user_id})
+        db.session.execute(text('DELETE FROM user_login WHERE user_id = :uid'), {'uid': user_id})
 
         db.session.commit()
 
@@ -438,7 +438,7 @@ def check_survey():
 
     query = text(
         'SELECT result AS rating '
-        'FROM Daily_Survey '
+        'FROM daily_survey '
         'WHERE user_id = :uid '
         'AND date >= :start_time '
         'AND date <= :end_time '
@@ -544,7 +544,7 @@ def save_daily_survey():
         # Update row if it exists for this day; otherwise insert one row for that day.
         update_result = session.execute(
             text(
-                'UPDATE Daily_Survey '
+                'UPDATE daily_survey '
                 'SET result = :rating '
                 'WHERE user_id = :uid '
                 'AND date >= :start_time '
@@ -562,7 +562,7 @@ def save_daily_survey():
         if update_result.rowcount == 0:
             session.execute(
                 text(
-                    'INSERT INTO Daily_Survey (user_id, result, date) '
+                    'INSERT INTO daily_survey (user_id, result, date) '
                     'VALUES (:uid, :result, :survey_date)'
                 ),
                 {
@@ -720,7 +720,7 @@ def changePayment():
             db.session.execute(
                 text(
                     'UPDATE payment_details '
-                    'SET card_num = :number, exp_month = :exp_month, exp_year = :exp_year, CVV = :cvc '
+                    'SET card_num = :number, exp_month = :exp_month, exp_year = :exp_year, cvv = :cvc '
                     'WHERE user_id = :uid'
                 ),
                 {
@@ -736,7 +736,7 @@ def changePayment():
             db.session.execute(
                 text(
                     'INSERT INTO payment_details '
-                    '(user_id, card_num, exp_month, exp_year, CVV) '
+                    '(user_id, card_num, exp_month, exp_year, cvv) '
                     'VALUES (:uid, :number, :exp_month, :exp_year, :cvc)'
                 ),
                 {
@@ -920,7 +920,7 @@ def upload_progress_picture():
         db = current_app.extensions['sqlalchemy']
         try:
             db.session.execute(
-                text('INSERT INTO Progress_Pictures (user_id, image_url) VALUES (:uid, :url)'),
+                text('INSERT INTO progress_pictures (user_id, image_url) VALUES (:uid, :url)'),
                 {'uid': user_id, 'url': file_url}
             )
             db.session.commit()
@@ -962,7 +962,7 @@ def get_progress_pictures(target_user_id):
         result = db.session.execute(
             text('''
                 SELECT picture_id, image_url, create_date 
-                FROM Progress_Pictures 
+                FROM progress_pictures 
                 WHERE user_id = :uid 
                 ORDER BY create_date DESC
             '''),
@@ -1015,12 +1015,12 @@ def delete_progress_picture(picture_id, user_id=None):
     try:
         if user_id is None:
             picture = db.session.execute(
-                text('SELECT picture_id, user_id, image_url FROM Progress_Pictures WHERE picture_id = :pid LIMIT 1'),
+                text('SELECT picture_id, user_id, image_url FROM progress_pictures WHERE picture_id = :pid LIMIT 1'),
                 {'pid': picture_id}
             ).mappings().first()
         else:
             picture = db.session.execute(
-                text('SELECT picture_id, user_id, image_url FROM Progress_Pictures WHERE picture_id = :pid AND user_id = :uid LIMIT 1'),
+                text('SELECT picture_id, user_id, image_url FROM progress_pictures WHERE picture_id = :pid AND user_id = :uid LIMIT 1'),
                 {'pid': picture_id, 'uid': user_id}
             ).mappings().first()
 
@@ -1029,12 +1029,12 @@ def delete_progress_picture(picture_id, user_id=None):
 
         if user_id is None:
             db.session.execute(
-                text('DELETE FROM Progress_Pictures WHERE picture_id = :pid'),
+                text('DELETE FROM progress_pictures WHERE picture_id = :pid'),
                 {'pid': picture_id}
             )
         else:
             db.session.execute(
-                text('DELETE FROM Progress_Pictures WHERE picture_id = :pid AND user_id = :uid'),
+                text('DELETE FROM progress_pictures WHERE picture_id = :pid AND user_id = :uid'),
                 {'pid': picture_id, 'uid': user_id}
             )
 

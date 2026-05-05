@@ -208,7 +208,7 @@ INSERT INTO users (user_id, role, is_banned, is_disabled) VALUES
 
 
 -- admin accounts
-INSERT INTO User_login (username, password_hash, user_id) VALUES
+INSERT INTO user_login (username, password_hash, user_id) VALUES
       ('Manny', 'scrypt:32768:8:1$NADsSJJvA8RlewqQ$4de5dd911c57da247018f634358305c9433dc24b86622e700760be212b154a4ac3bad040c43bd4a7dc06366dfb96842a86e2972a60d4e48896284d22c482e5a2', 1),
       ('Dylan', 'scrypt:32768:8:1$NADsSJJvA8RlewqQ$4de5dd911c57da247018f634358305c9433dc24b86622e700760be212b154a4ac3bad040c43bd4a7dc06366dfb96842a86e2972a60d4e48896284d22c482e5a2', 2),
       ('Takaaki', 'scrypt:32768:8:1$NADsSJJvA8RlewqQ$4de5dd911c57da247018f634358305c9433dc24b86622e700760be212b154a4ac3bad040c43bd4a7dc06366dfb96842a86e2972a60d4e48896284d22c482e5a2', 3),
@@ -216,7 +216,7 @@ INSERT INTO User_login (username, password_hash, user_id) VALUES
       ('Eric', 'scrypt:32768:8:1$NADsSJJvA8RlewqQ$4de5dd911c57da247018f634358305c9433dc24b86622e700760be212b154a4ac3bad040c43bd4a7dc06366dfb96842a86e2972a60d4e48896284d22c482e5a2', 5),
       ('Jeremiah', 'scrypt:32768:8:1$NADsSJJvA8RlewqQ$4de5dd911c57da247018f634358305c9433dc24b86622e700760be212b154a4ac3bad040c43bd4a7dc06366dfb96842a86e2972a60d4e48896284d22c482e5a2', 6);
 -- user counts
-INSERT INTO User_login (username, password_hash, user_id) VALUES
+INSERT INTO user_login (username, password_hash, user_id) VALUES
       ('MockUser', 'scrypt:32768:8:1$NADsSJJvA8RlewqQ$4de5dd911c57da247018f634358305c9433dc24b86622e700760be212b154a4ac3bad040c43bd4a7dc06366dfb96842a86e2972a60d4e48896284d22c482e5a2', 7),
       ('cbrennen7', '$2a$04$wwKje5jCK4vtALbarJAb7entM0pkau0UWISPsVXhOHb.lYOdEtK9a', 8),
       ('nsears8', '$2a$04$GQR5SfzE6M6T.7a.uqjrIuf.i.BJP6jjqv19SyQV785x33FhJD8AG', 9),
@@ -412,8 +412,8 @@ INSERT INTO User_login (username, password_hash, user_id) VALUES
       ('pgainsford5i', '$2a$04$CK6ZY7HXsuyICKSiIwh2oOrElwoCs.7DlL9CJeNxHRDT16EXnLH/m', 199),
       ('dsheivels5j', '$2a$04$O1iZyFahAVIKOqY2JVf7lOhzGmHCoj3dH8z197pcRCsmgh8l4ts0G', 200);
 
--- Admin Users
-INSERT INTO User_Profiles (user_id, first_name, last_name, current_weight) VALUES
+-- Admin users
+INSERT INTO user_profiles (user_id, first_name, last_name, current_weight) VALUES
    (1, 'admin', 'admin', 186),
    (2, 'admin', 'admin', 210),
    (3, 'admin', 'admin', 165),
@@ -421,8 +421,8 @@ INSERT INTO User_Profiles (user_id, first_name, last_name, current_weight) VALUE
    (5, 'admin', 'admin', 220),
    (6, 'admin', 'admin', 178);
 
--- Standard Users
-INSERT INTO User_Profiles (user_id, first_name, last_name, current_weight) VALUES
+-- Standard users
+INSERT INTO user_profiles (user_id, first_name, last_name, current_weight) VALUES
    (7, 'MockFirstName', 'MockLastName', 198),
    (8, 'Sunshine', 'Swift', 145),
    (9, 'Welch', 'MacGettigen', 216),
@@ -619,8 +619,8 @@ INSERT INTO User_Profiles (user_id, first_name, last_name, current_weight) VALUE
    (200, 'Coleen', 'Sesser', 140);
 
 -- 4. INSERT GOALS
--- Admin Goals (Users 1-6)
-INSERT INTO Goals (user_id, goal_weight, goal_type, information) VALUES
+-- Admin goals (users 1-6)
+INSERT INTO goals (user_id, goal_weight, goal_type, information) VALUES
      (1, 167.16, 'Strength', 'Increase Bench Press'),
      (2, 321.17, 'Strength', 'Squat 3 Plates'),
      (3, 196.51, 'Weightloss', 'Reduce Body Fat %'),
@@ -628,8 +628,8 @@ INSERT INTO Goals (user_id, goal_weight, goal_type, information) VALUES
      (5, 440.13, 'Weightloss', 'Doctor Recommended'),
      (6, 174.9, 'Weightloss', 'Improve Mobility');
 
--- Standard User Goals (Users 7-200)
-INSERT INTO Goals (user_id, goal_weight, goal_type, information) VALUES
+-- Standard User goals (users 7-200)
+INSERT INTO goals (user_id, goal_weight, goal_type, information) VALUES
      (7, 200.87, 'Strength', 'Pull-up Training'),
      (8, 200.82, 'Stamina', 'Run 5k under 25m'),
      (9, 175.03, 'Stamina', 'Marathon Training'),
@@ -827,7 +827,7 @@ INSERT INTO Goals (user_id, goal_weight, goal_type, information) VALUES
 
 use GroupProject;
 
--- Payment Details (Users 1-200)
+-- Payment Details (users 1-200)
 INSERT INTO payment_details (user_id, card_num, cvv, exp_month, exp_year) VALUES
       (1, '56022339242758462', 879, 8, 2033), (2, '3535839033724385', 535, 8, 2037), (3, '3528235204276934', 165, 3, 2034), (4, '3529901529246725', 488, 12, 2030), (5, '3550103097632111', 660, 3, 2030),
       (6, '6389984186021856', 138, 9, 2035), (7, '5002350009634177', 303, 10, 2027), (8, '3581442319566084', 731, 7, 2037), (9, '50185297835363569', 735, 11, 2035), (10, '5113450985500230', 455, 11, 2038),
@@ -872,7 +872,7 @@ INSERT INTO payment_details (user_id, card_num, cvv, exp_month, exp_year) VALUES
 
 use GroupProject;
 
-INSERT INTO Coach_Profiles (coach_id, user_id, bio, is_nutritionist, is_active, pricing) VALUES
+INSERT INTO coach_profiles (coach_id, user_id, bio, is_nutritionist, is_active, pricing) VALUES
      (1, 16, 'Certified Nutritionist and Strength Coach specializing in body recomposition. I help clients build sustainable eating habits while hitting PRs in the gym.', true, 1, 24.99),
      (2, 27, 'Holistic wellness coach with a focus on plant-based nutrition and functional movement. 10+ years of experience helping athletes optimize their fuel.', true, 1, 24.99),
      (3, 28, 'Precision Nutrition Level 1 certified. I bridge the gap between the kitchen and the weight room to ensure your hard work pays off.', true, 1, 24.99),
@@ -898,8 +898,8 @@ INSERT INTO Coach_Profiles (coach_id, user_id, bio, is_nutritionist, is_active, 
 
 use GroupProject;
 
--- Daily Survey Results (Users 1-200)
-INSERT INTO Daily_Survey (survey_id, user_id, result) VALUES
+-- Daily Survey Results (users 1-200)
+INSERT INTO daily_survey (survey_id, user_id, result) VALUES
       (1, 1, 4), (2, 2, 4), (3, 3, 2), (4, 4, 3), (5, 5, 3), (6, 6, 4), (7, 7, 5), (8, 8, 1), (9, 9, 2), (10, 10, 3),
       (11, 11, 5), (12, 12, 4), (13, 13, 1), (14, 14, 5), (15, 15, 3), (16, 16, 4), (17, 17, 2), (18, 18, 4), (19, 19, 1), (20, 20, 5),
       (21, 21, 4), (22, 22, 4), (23, 23, 3), (24, 24, 4), (25, 25, 3), (26, 26, 2), (27, 27, 4), (28, 28, 2), (29, 29, 5), (30, 30, 1),
@@ -921,7 +921,7 @@ INSERT INTO Daily_Survey (survey_id, user_id, result) VALUES
       (181, 181, 2), (182, 182, 2), (183, 183, 3), (184, 184, 3), (185, 185, 3), (186, 186, 1), (187, 187, 5), (188, 188, 3), (189, 189, 4), (190, 190, 3),
       (191, 191, 5), (192, 192, 4), (193, 193, 2), (194, 194, 5), (195, 195, 2), (196, 196, 3), (197, 197, 4), (198, 198, 4), (199, 199, 2), (200, 200, 4);
 
-INSERT INTO Daily_Survey (user_id, result) VALUES
+INSERT INTO daily_survey (user_id, result) VALUES
 -- Additional data for User 7
 (7, 4),
 (7, 3),
@@ -939,7 +939,7 @@ INSERT INTO Daily_Survey (user_id, result) VALUES
 use GroupProject;
 
 -- Coach Requests (Mapping Subscriptions and Pending Inquiries)
-INSERT INTO Coach_requests (request_id, user_id, coach_id, comment, status) VALUES
+INSERT INTO coach_requests (request_id, user_id, coach_id, comment, status) VALUES
     (1, 7, 1, NULL, 'accepted'),
     (2, 23, 2, NULL, 'accepted'),
     (3, 31, 3, NULL, 'accepted'),
@@ -971,7 +971,7 @@ INSERT INTO Coach_requests (request_id, user_id, coach_id, comment, status) VALU
 
 use GroupProject;
 
--- Coach Subscriptions (Mapping Users to Coaches)
+-- Coach Subscriptions (Mapping users to Coaches)
 INSERT INTO coach_subscriptions (subscription_id, user_id, coach_id) VALUES
      (1, 7, 1),
      (2, 23, 2),
@@ -1000,7 +1000,7 @@ INSERT INTO coach_subscriptions (subscription_id, user_id, coach_id) VALUES
 
 use GroupProject;
 
-INSERT INTO Coach_reviews (review_id, user_id, coach_id, rating) VALUES
+INSERT INTO coach_reviews (review_id, user_id, coach_id, rating) VALUES
      (1, 24, 1, 4),
      (2, 23, 2, 3),
      (3, 31, 3, 2),
@@ -1263,7 +1263,7 @@ INSERT INTO weight_logs (user_id, weight, log_date) VALUES
 (16, 188, '2026-04-25 08:00:00'), (16, 188, '2026-04-26 08:00:00'), (16, 188, '2026-04-27 08:00:00'),
 (16, 188, '2026-04-28 08:00:00'), (16, 188, '2026-04-29 08:00:00'), (16, 188, '2026-04-30 08:00:00');
 
-INSERT INTO Progress_Pictures (user_id, image_url, create_date) VALUES
+INSERT INTO progress_pictures (user_id, image_url, create_date) VALUES
 -- User 7: 8 Months of Progress
 (7, 'http://127.0.0.1:5000/static/progress/7-1.png', '2025-09-19 09:00:00'),
 (7, 'http://127.0.0.1:5000/static/progress/7-2.png', '2025-10-19 09:00:00'),

@@ -1142,7 +1142,7 @@ def fetch_users():
     Gets all of the users by pagination and search
     ---
     tags:
-        - Admin - Users
+        - Admin - users
     parameters:
         - name: page
           in: query
@@ -1188,9 +1188,9 @@ def fetch_users():
     
     count_sql = text(
         'SELECT COUNT(*) AS total '
-        'FROM Users u '
-        'LEFT JOIN User_login ul ON ul.user_id = u.user_id '
-        'LEFT JOIN User_Profiles up ON up.user_id = u.user_id '
+        'FROM users u '
+        'LEFT JOIN user_login ul ON ul.user_id = u.user_id '
+        'LEFT JOIN user_profiles up ON up.user_id = u.user_id '
         f'{where_sql}'
     )
     
@@ -1199,9 +1199,9 @@ def fetch_users():
         'u.user_id, u.role, u.is_banned, u.is_disabled, u.create_date, '
         'ul.username, '
         'up.first_name, up.last_name, up.birthday, up.current_weight '
-        'FROM Users u '
-        'LEFT JOIN User_login ul ON ul.user_id = u.user_id '
-        'LEFT JOIN User_Profiles up ON up.user_id = u.user_id '
+        'FROM users u '
+        'LEFT JOIN user_login ul ON ul.user_id = u.user_id '
+        'LEFT JOIN user_profiles up ON up.user_id = u.user_id '
         f'{where_sql}'
         'ORDER BY u.user_id ASC '
         'LIMIT :limit OFFSET :offset'
@@ -1278,13 +1278,13 @@ def platform_metrics():
     try:
         metrics_sql = text(
             'SELECT '
-            '(SELECT COUNT(*) FROM Users) AS total_users, '
+            '(SELECT COUNT(*) FROM users) AS total_users, '
             '(SELECT COUNT(*) FROM coach_subscriptions) AS total_subscriptions, '
             'COALESCE(( '
             '  SELECT SUM(cp.pricing) '
             '  FROM coach_subscriptions cs '
             '  JOIN coach_profiles cp ON cp.coach_id = cs.coach_id '
-            '  JOIN Users u ON u.user_id = cs.user_id '
+            '  JOIN users u ON u.user_id = cs.user_id '
             "  WHERE u.role = 'U' "
             '), 0) AS total_revenue'
         )
