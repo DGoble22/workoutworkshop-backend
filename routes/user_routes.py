@@ -110,7 +110,7 @@ def upload_profile_picture():
         filepath = os.path.join(save_dir, filename)
         file.save(filepath)
 
-        file_url = f"http://127.0.0.1:5000/static/profiles/{filename}"
+        file_url = f"https://workoutworkshop-backend.onrender.com/static/profiles/{filename}"
 
         db = current_app.extensions['sqlalchemy']
         try:
@@ -914,7 +914,7 @@ def upload_progress_picture():
         file.save(filepath)
 
         # Create the public URL
-        file_url = f"http://127.0.0.1:5000/{PROGRESS_UPLOAD_FOLDER}/{filename}"
+        file_url = f"https://workoutworkshop-backend.onrender.com/{PROGRESS_UPLOAD_FOLDER}/{filename}"
 
         # 3. Insert into Database
         db = current_app.extensions['sqlalchemy']

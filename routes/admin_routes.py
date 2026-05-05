@@ -974,7 +974,7 @@ def add_exercise():
             save_path = os.path.join(target_path, filename)
             file.save(save_path)
             # The exact string saved to the database:
-            thumb_url = f"http://127.0.0.1:5000/static/workouts/{filename}"
+            thumb_url = f"https://workoutworkshop-backend.onrender.com/static/workouts/{filename}"
 
     try:
         # 3. Your original SQL insert logic
@@ -1103,7 +1103,7 @@ def update_exercise(exercise_id):
 
             save_path = os.path.join(target_path, filename)
             file.save(save_path)
-            thumb_url = f"http://127.0.0.1:5000/static/workouts/{filename}"
+            thumb_url = f"https://workoutworkshop-backend.onrender.com/static/workouts/{filename}"
 
     if not thumb_url:
         thumb_url = request.form.get('thumb_url')
