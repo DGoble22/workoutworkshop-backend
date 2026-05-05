@@ -140,7 +140,7 @@ class TestAuthRoutes(unittest.TestCase):
         response = self.client.post("/auth/register", data=payload)
         data = response.get_json()
 
-        self.assertEqual(response.status_code, [201,500])
+        self.assertIn(response.status_code, [201,500])
         self.assertEqual(data["status"], "success")
 
     def test_register_coach_with_file(self):
@@ -161,7 +161,7 @@ class TestAuthRoutes(unittest.TestCase):
             "certificationFile_0": (BytesIO(b"dummy file content"), "cert.jpeg")
         }
         response = self.client.post("/auth/register", data=payload, content_type='multipart/form-data')
-        self.assertEqual(response.status_code, [201,500])
+        self.assertIn(response.status_code, [201,500])
 
     def test_register_missing_fields(self):
         payload = {"username": "incomplete_user"}
