@@ -233,15 +233,18 @@ def save_workout():
                                      VALUES (:plan_id, :exercise_id, :sets, :reps, :weight)
                                      """)
 
-        # Defaults sets, reps, weight to 0 if empty
-        for exercise in exercises:
-            db.session.execute(insert_exercise_query, {
-                "plan_id": plan_id,
-                "exercise_id": exercise['exercise_id'],
-                "sets": exercise.get('sets', 0),
-                "reps": exercise.get('reps', 0),
-                "weight": exercise.get('weight', 0)
-            })
+        # Bulk insert all exercises
+        exercise_data = [{
+            "plan_id": plan_id,
+            "exercise_id": ex['exercise_id'],
+            "sets": ex.get('sets', 0),
+            "reps": ex.get('reps', 0),
+            "weight": ex.get('weight', 0)
+        } for ex in exercises]
+
+        # Passes a list of dicts
+        if exercise_data:
+            db.session.execute(insert_exercise_query, exercise_data)
 
         db.session.commit()
 
@@ -275,18 +278,46 @@ def get_workout_log(user_id):
     db = current_app.extensions['sqlalchemy']
 
     try:
-        # Grab workouts, newest first
+        # One query to get plans and exercises in the log and join with exercise details.
         query = text("""
-                     SELECT plan_id as id, planned_date as date, title
-                     FROM workout_plans
-                     WHERE user_id = :user_id
-                     ORDER BY plan_id DESC
+                     SELECT wp.plan_id as id,
+                            wp.planned_date as date, wp.title,
+                       pe.exercise_id, e.name as exercise_name, pe.sets, pe.reps, pe.weight, pe.completed
+                     FROM workout_plans wp
+                         LEFT JOIN plan_exercise pe
+                     ON wp.plan_id = pe.plan_id
+                         LEFT JOIN exercises e ON pe.exercise_id = e.exercise_id
+                     WHERE wp.user_id = :user_id
+                     ORDER BY wp.plan_id DESC
                      """)
 
         result = db.session.execute(query, {"user_id": user_id}).mappings().fetchall()
 
-        # Convert result to list of dicts
-        workouts = [dict(row) for row in result]
+        # Group exercises by workout plan using a dictionary, then convert back to list for frontend
+        workouts_dict = {}
+        for row in result:
+            plan_id = row['id']
+            if plan_id not in workouts_dict:
+                workouts_dict[plan_id] = {
+                    'id': plan_id,
+                    'date': row['date'],
+                    'title': row['title'],
+                    'exercises': []
+                }
+
+            # If this workout has exercises attached, append them to the list
+            if row['exercise_id']:
+                workouts_dict[plan_id]['exercises'].append({
+                    'exercise_id': row['exercise_id'],
+                    'exercise_name': row['exercise_name'],
+                    'sets': row['sets'],
+                    'reps': row['reps'],
+                    'weight': row['weight'],
+                    'completed': row['completed']
+                })
+
+        # Convert dictionary back to a list for the frontend
+        workouts = list(workouts_dict.values())
 
         return jsonify({'status': 'success', 'data': workouts}), 200
 
@@ -418,24 +449,26 @@ def update_workout_plan(plan_id):
     if not exercises:
         return jsonify({'status': 'error', 'message': 'No exercises provided for update'}), 400
     try:
-        # Loop through exercise and update each one in the plan_exercise table
-        for ex in exercises:
-            update_query = text("""
-                                UPDATE plan_exercise
-                                SET reps   = :reps,
-                                    `sets`   = :sets,
-                                    weight = :weight
-                                WHERE plan_id = :plan_id
-                                  AND exercise_id = :exercise_id
-                                """)
+        update_query = text("""
+                            UPDATE plan_exercise
+                            SET reps   = :reps,
+                                `sets` = :sets,
+                                weight = :weight
+                            WHERE plan_id = :plan_id
+                              AND exercise_id = :exercise_id
+                            """)
 
-            db.session.execute(update_query, {
-                "reps": ex.get('reps'),
-                "sets": ex.get('sets'),
-                "weight": ex.get('weight'),
-                "plan_id": plan_id,
-                "exercise_id": ex.get('exercise_id')
-            })
+        # Bulk Update using a list of dictionaries
+        update_data = [{
+            "reps": ex.get('reps'),
+            "sets": ex.get('sets'),
+            "weight": ex.get('weight'),
+            "plan_id": plan_id,
+            "exercise_id": ex.get('exercise_id')
+        } for ex in exercises]
+
+        if update_data:
+            db.session.execute(update_query, update_data)
 
         db.session.commit()
 
