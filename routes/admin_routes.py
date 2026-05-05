@@ -98,7 +98,7 @@ def coach_applications(): # Get the information on Coach Applications
     if search:
         where_sql += (
             'AND ('
-            'CONCAT(up.first_name, ' ', up.last_name) LIKE :search '
+            "CONCAT(up.first_name, ' ', up.last_name) LIKE :search "
             'OR CAST(cp.coach_id AS CHAR) LIKE :search '
             'OR CAST(cc.certification_id AS CHAR) LIKE :search'
             ') '
@@ -115,7 +115,7 @@ def coach_applications(): # Get the information on Coach Applications
 
     data_sql = text(
         'SELECT '
-        'cp.coach_id, CONCAT(up.first_name, ' ' , up.last_name) AS display_name, '
+        "cp.coach_id, CONCAT(up.first_name, ' ' , up.last_name) AS display_name, "
         'cc.certification_id, cc.status '
         'FROM coach_certifications cc '
         'JOIN coach_profiles cp ON cc.coach_id = cp.coach_id '
@@ -474,7 +474,7 @@ def coach_reports(): # Get the information on Coach Reports
     if search:
         where_sql += (
             'AND ('
-            'CONCAT(up.first_name, ' ', up.last_name) LIKE :search '
+            "CONCAT(up.first_name, ' ', up.last_name) LIKE :search "
             'OR cr.reason LIKE :search '
             'OR CAST(cr.report_id AS CHAR) LIKE :search '
             'OR CAST(cp.coach_id AS CHAR) LIKE :search'
@@ -492,7 +492,7 @@ def coach_reports(): # Get the information on Coach Reports
 
     data_sql = text(
         'SELECT '
-        'cr.report_id, cp.coach_id, CONCAT(up.first_name, ' ', up.last_name) AS display_name, '
+        "cr.report_id, cp.coach_id, CONCAT(up.first_name, ' ', up.last_name) AS display_name, "
         'cr.reason, cr.status '
         'FROM coach_reports cr '
         'JOIN coach_profiles cp ON cr.coach_id = cp.coach_id '
