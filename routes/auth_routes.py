@@ -330,13 +330,19 @@ def _save_certification_files(files, username: str) -> list:
     save_dir = os.path.join(current_app.root_path, CERT_UPLOAD_FOLDER)
     os.makedirs(save_dir, exist_ok=True)
 
+    # Use configured external base URL (fallback to the provided domain)
+    base = current_app.config.get(
+        'EXTERNAL_BASE_URL',
+        'https://workoutworkshop-backend.onrender.com'
+    ).rstrip('/')
+
     timestamp = datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d%H%M%S')
     for idx, file in enumerate(files):
         filename = secure_filename(file.filename or f'cert_{idx}')
         final_name = f'{username}_{timestamp}_{idx}_{filename}'
         file_path = os.path.join(save_dir, final_name)
         file.save(file_path)
-        urls.append(f"{request.host_url.rstrip('/')}/static/certifications/{final_name}")
+        urls.append(f"{base}/static/certifications/{final_name}")
 
     return urls
 
