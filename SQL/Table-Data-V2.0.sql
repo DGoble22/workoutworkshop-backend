@@ -1,4 +1,4 @@
-use GroupProject;
+use defaultdb;
 
 -- admins
 INSERT INTO users (user_id, role, is_banned, is_disabled) VALUES
@@ -825,7 +825,7 @@ INSERT INTO goals (user_id, goal_weight, goal_type, information) VALUES
      (199, 121.85, 'Strength', 'Bodyweight king'),
      (200, 193.39, 'Weightloss', 'New start');
 
-use GroupProject;
+use defaultdb;
 
 -- Payment Details (users 1-200)
 INSERT INTO payment_details (user_id, card_num, cvv, exp_month, exp_year) VALUES
@@ -870,7 +870,7 @@ INSERT INTO payment_details (user_id, card_num, cvv, exp_month, exp_year) VALUES
       (191, '5002353396742678', 985, 2, 2031), (192, '5602237187905905', 521, 11, 2029), (193, '372301279984316', 908, 11, 2032), (194, '4903713259595592867', 237, 11, 2037), (195, '5108756677339563', 618, 4, 2029),
       (196, '56022452315331362', 855, 7, 2035), (197, '3539883699642370', 551, 9, 2027), (198, '3573617076556861', 327, 5, 2031), (199, '3585952333304110', 942, 8, 2027), (200, '4041590454401', 388, 12, 2036);
 
-use GroupProject;
+use defaultdb;
 
 INSERT INTO coach_profiles (coach_id, user_id, bio, is_nutritionist, is_active, pricing) VALUES
      (1, 16, 'Certified Nutritionist and Strength Coach specializing in body recomposition. I help clients build sustainable eating habits while hitting PRs in the gym.', true, 1, 24.99),
@@ -896,7 +896,7 @@ INSERT INTO coach_profiles (coach_id, user_id, bio, is_nutritionist, is_active, 
      (21, 197, 'General population coach. I help normal people fit fitness into their chaotic lives without making it a second full-time job.', false, 1, 24.99),
      (22, 200, 'Hardcore hypertrophy coach. 100% effort, every set, every rep. Not for the faint of heart.', false, 1, 24.99);
 
-use GroupProject;
+use defaultdb;
 
 -- Daily Survey Results (users 1-200)
 INSERT INTO daily_survey (survey_id, user_id, result) VALUES
@@ -936,7 +936,7 @@ INSERT INTO daily_survey (user_id, result) VALUES
 (16, 3),
 (16, 5);
 
-use GroupProject;
+use defaultdb;
 
 -- Coach Requests (Mapping Subscriptions and Pending Inquiries)
 INSERT INTO coach_requests (request_id, user_id, coach_id, comment, status) VALUES
@@ -969,7 +969,7 @@ INSERT INTO coach_requests (request_id, user_id, coach_id, comment, status) VALU
     (26, 112, 1, 'Heard great things, would love to work with you.', 'pending'),
     (27, 140, 1, 'Ready to hit my weight loss goals.', 'pending');
 
-use GroupProject;
+use defaultdb;
 
 -- Coach Subscriptions (Mapping users to Coaches)
 INSERT INTO coach_subscriptions (subscription_id, user_id, coach_id) VALUES
@@ -998,7 +998,7 @@ INSERT INTO coach_subscriptions (subscription_id, user_id, coach_id) VALUES
      (23, 112, 1),
      (24, 140, 1);
 
-use GroupProject;
+use defaultdb;
 
 INSERT INTO coach_reviews (review_id, user_id, coach_id, rating) VALUES
      (1, 24, 1, 4),
@@ -1022,7 +1022,7 @@ INSERT INTO coach_reviews (review_id, user_id, coach_id, rating) VALUES
      (19, 192, 19, 4),
      (20, 200, 20, 5);
 
-use GroupProject;
+use defaultdb;
 
 INSERT INTO coach_reports
 (reporter_id, coach_id, reason, status, create_date, last_update)
@@ -1038,7 +1038,7 @@ VALUES
     (9, 10, 'Failed to provide any progress feedback after onboarding.', 'pending',  '2026-03-17 11:50:00', '2026-03-17 11:50:00'),
     (10, 11, 'Repeatedly extended session times without consent and billed extra.', 'reviewed', '2026-03-18 16:40:00', '2026-03-19 09:00:00');
 
-use GroupProject;
+use defaultdb;
 
 INSERT INTO coach_availability
 (coach_id, DOW, start_time, end_time, create_date, last_update)
@@ -1075,7 +1075,7 @@ VALUES
     (10, 'TH',  '13:00:00', '17:00:00', '2026-03-10 08:28:00', '2026-03-10 08:28:00'),
     (10, 'SUN', '09:00:00', '12:00:00', '2026-03-10 08:29:00', '2026-03-10 08:29:00');
 
-use GroupProject;
+use defaultdb;
 
 INSERT INTO coach_certifications (certification_id, coach_id, file_url) VALUES
     (1, 1, 'http://127.0.0.1:5000/static/certifications/nasm-certificate.jpg'),
@@ -1101,7 +1101,7 @@ INSERT INTO coach_certifications (certification_id, coach_id, file_url) VALUES
     (21, 21, 'http://127.0.0.1:5000/static/certifications/nasm-certificate.jpg'),
     (22, 22, 'http://127.0.0.1:5000/static/certifications/nasm-certificate.jpg');
 
-use GroupProject;
+use defaultdb;
 
 -- Merged Exercise Inserts
 INSERT INTO exercises (name, muscle_group, equipment_needed, is_removed, video_url, thumbnail)
@@ -1131,7 +1131,7 @@ VALUES
     ('Cable Row', 'Back', 'Machine', 0, 'https://youtu.be/GZbfZ033f74?si=dCtaW-aBX0FjwqQD', 'http://127.0.0.1:5000/static/workouts/cablerow.jpg'),
     ('Preacher Curls', 'Arms', 'Free Weight', 0, 'https://youtu.be/02TvQZiVdic?si=M1U5UopmHc0d6W4u', 'http://127.0.0.1:5000/static/workouts/preachercurls.jpg');
 
-use GroupProject;
+use defaultdb;
 
 insert into weekly_meals(coach_id, user_id) values (1, 16);
 insert into weekly_meals(coach_id, user_id) values(2, 27);

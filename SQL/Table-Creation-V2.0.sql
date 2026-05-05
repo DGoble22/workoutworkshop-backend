@@ -1,10 +1,10 @@
 
 -- create the DB
-drop database if exists GroupProject;
-create database GroupProject;
+drop database if exists defaultdb;
+create database defaultdb;
 
 -- use the DB
-use GroupProject;
+use defaultdb;
 
 -- drop tables if they exist
 -- need to drop in opposite order of create due to foreign key constraints
