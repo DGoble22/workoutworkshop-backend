@@ -44,4 +44,4 @@ app.register_blueprint(workout_bp)
 register_chat_events(socketio, app)
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, port=5000, host='localhost')
+    socketio.run(app, debug=True, host='https://workoutworkshop-backend.onrender.com')
