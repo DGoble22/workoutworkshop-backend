@@ -974,7 +974,7 @@ def add_exercise():
             save_path = os.path.join(target_path, filename)
             file.save(save_path)
             # The exact string saved to the database:
-            thumb_url = f"workoutworkshopdb-workoutworkshop.c.aivencloud.com:24183/static/workouts/{filename}"
+            thumb_url = f"https://workoutworkshopdb-workoutworkshop.c.aivencloud.com:24183/static/workouts/{filename}"
 
     try:
         # 3. Your original SQL insert logic
