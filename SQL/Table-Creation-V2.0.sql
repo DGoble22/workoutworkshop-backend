@@ -1,6 +1,6 @@
 
 -- create the DB
-drop database if exists groupproject;
+drop database if exists GroupProject;
 create database GroupProject;
 
 -- use the DB
