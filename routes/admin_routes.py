@@ -98,7 +98,7 @@ def coach_applications(): # Get the information on Coach Applications
     if search:
         where_sql += (
             'AND ('
-            'CONCAT(up.first_name, " ", up.last_name) LIKE :search '
+            "CONCAT(up.first_name, ' ', up.last_name) LIKE :search "
             'OR CAST(cp.coach_id AS CHAR) LIKE :search '
             'OR CAST(cc.certification_id AS CHAR) LIKE :search'
             ') '
@@ -115,7 +115,7 @@ def coach_applications(): # Get the information on Coach Applications
 
     data_sql = text(
         'SELECT '
-        'cp.coach_id, CONCAT(up.first_name, " ", up.last_name) AS display_name, '
+        "cp.coach_id, CONCAT(up.first_name, ' ' , up.last_name) AS display_name, "
         'cc.certification_id, cc.status '
         'FROM coach_certifications cc '
         'JOIN coach_profiles cp ON cc.coach_id = cp.coach_id '
@@ -474,7 +474,7 @@ def coach_reports(): # Get the information on Coach Reports
     if search:
         where_sql += (
             'AND ('
-            'CONCAT(up.first_name, " ", up.last_name) LIKE :search '
+            "CONCAT(up.first_name, ' ', up.last_name) LIKE :search "
             'OR cr.reason LIKE :search '
             'OR CAST(cr.report_id AS CHAR) LIKE :search '
             'OR CAST(cp.coach_id AS CHAR) LIKE :search'
@@ -492,7 +492,7 @@ def coach_reports(): # Get the information on Coach Reports
 
     data_sql = text(
         'SELECT '
-        'cr.report_id, cp.coach_id, CONCAT(up.first_name, " ", up.last_name) AS display_name, '
+        "cr.report_id, cp.coach_id, CONCAT(up.first_name, ' ', up.last_name) AS display_name, "
         'cr.reason, cr.status '
         'FROM coach_reports cr '
         'JOIN coach_profiles cp ON cr.coach_id = cp.coach_id '
@@ -974,7 +974,7 @@ def add_exercise():
             save_path = os.path.join(target_path, filename)
             file.save(save_path)
             # The exact string saved to the database:
-            thumb_url = f"http://127.0.0.1:5000/static/workouts/{filename}"
+            thumb_url = f"https://workoutworkshop-backend.onrender.com/static/workouts/{filename}"
 
     try:
         # 3. Your original SQL insert logic
@@ -1103,7 +1103,7 @@ def update_exercise(exercise_id):
 
             save_path = os.path.join(target_path, filename)
             file.save(save_path)
-            thumb_url = f"http://127.0.0.1:5000/static/workouts/{filename}"
+            thumb_url = f"https://workoutworkshop-backend.onrender.com/static/workouts/{filename}"
 
     if not thumb_url:
         thumb_url = request.form.get('thumb_url')
@@ -1142,7 +1142,7 @@ def fetch_users():
     Gets all of the users by pagination and search
     ---
     tags:
-        - Admin - Users
+        - Admin - users
     parameters:
         - name: page
           in: query
@@ -1188,9 +1188,9 @@ def fetch_users():
     
     count_sql = text(
         'SELECT COUNT(*) AS total '
-        'FROM Users u '
-        'LEFT JOIN User_login ul ON ul.user_id = u.user_id '
-        'LEFT JOIN User_Profiles up ON up.user_id = u.user_id '
+        'FROM users u '
+        'LEFT JOIN user_login ul ON ul.user_id = u.user_id '
+        'LEFT JOIN user_profiles up ON up.user_id = u.user_id '
         f'{where_sql}'
     )
     
@@ -1199,9 +1199,9 @@ def fetch_users():
         'u.user_id, u.role, u.is_banned, u.is_disabled, u.create_date, '
         'ul.username, '
         'up.first_name, up.last_name, up.birthday, up.current_weight '
-        'FROM Users u '
-        'LEFT JOIN User_login ul ON ul.user_id = u.user_id '
-        'LEFT JOIN User_Profiles up ON up.user_id = u.user_id '
+        'FROM users u '
+        'LEFT JOIN user_login ul ON ul.user_id = u.user_id '
+        'LEFT JOIN user_profiles up ON up.user_id = u.user_id '
         f'{where_sql}'
         'ORDER BY u.user_id ASC '
         'LIMIT :limit OFFSET :offset'
@@ -1278,13 +1278,13 @@ def platform_metrics():
     try:
         metrics_sql = text(
             'SELECT '
-            '(SELECT COUNT(*) FROM Users) AS total_users, '
+            '(SELECT COUNT(*) FROM users) AS total_users, '
             '(SELECT COUNT(*) FROM coach_subscriptions) AS total_subscriptions, '
             'COALESCE(( '
             '  SELECT SUM(cp.pricing) '
             '  FROM coach_subscriptions cs '
             '  JOIN coach_profiles cp ON cp.coach_id = cs.coach_id '
-            '  JOIN Users u ON u.user_id = cs.user_id '
+            '  JOIN users u ON u.user_id = cs.user_id '
             "  WHERE u.role = 'U' "
             '), 0) AS total_revenue'
         )

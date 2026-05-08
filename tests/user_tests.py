@@ -70,7 +70,7 @@ class TestUserRoutes(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
 
 
-    # Update Goals
+    # Update goals
     def test_update_goals_success(self):
         payload = {
             "current_weight": 182,

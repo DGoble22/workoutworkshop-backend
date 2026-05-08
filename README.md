@@ -46,7 +46,7 @@ Create a .env file in the root directory of the project and add the following li
 DB_USER=root
 DB_PASSWORD=
 DB_HOST=localhost
-DB_NAME=GroupProject
+DB_NAME=defaultdb
 ```
 
 ### 6. Run the Application

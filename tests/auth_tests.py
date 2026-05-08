@@ -42,7 +42,7 @@ class TestAuthRoutes(unittest.TestCase):
                     _exec_in("DELETE FROM exercises WHERE exercise_id IN :ids", "ids", exercise_ids)
 
                 user_ids = db.session.execute(
-                    text("SELECT user_id FROM User_login WHERE username IN :names").bindparams(
+                    text("SELECT user_id FROM user_login WHERE username IN :names").bindparams(
                         bindparam("names", expanding=True)
                     ),
                     {"names": test_usernames}
@@ -53,7 +53,7 @@ class TestAuthRoutes(unittest.TestCase):
                     return
 
                 coach_ids = db.session.execute(
-                    text("SELECT coach_id FROM Coach_Profiles WHERE user_id IN :uids").bindparams(
+                    text("SELECT coach_id FROM coach_profiles WHERE user_id IN :uids").bindparams(
                         bindparam("uids", expanding=True)
                     ),
                     {"uids": user_ids}
@@ -67,7 +67,7 @@ class TestAuthRoutes(unittest.TestCase):
                     _exec_in("DELETE FROM coach_requests WHERE coach_id IN :ids", "ids", coach_ids)
                     _exec_in("DELETE FROM coach_reports WHERE coach_id IN :ids", "ids", coach_ids)
                     _exec_in("DELETE FROM coach_reviews WHERE coach_id IN :ids", "ids", coach_ids)
-                    _exec_in("DELETE FROM Coach_Profiles WHERE coach_id IN :ids", "ids", coach_ids)
+                    _exec_in("DELETE FROM coach_profiles WHERE coach_id IN :ids", "ids", coach_ids)
 
                 _exec_in("DELETE FROM message WHERE sender_id IN :ids OR receiver_id IN :ids", "ids", user_ids)
                 _exec_in("DELETE FROM payment_details WHERE user_id IN :ids", "ids", user_ids)
@@ -78,8 +78,8 @@ class TestAuthRoutes(unittest.TestCase):
                 _exec_in("DELETE FROM coach_requests WHERE user_id IN :ids", "ids", user_ids)
                 _exec_in("DELETE FROM coach_reports WHERE reporter_id IN :ids", "ids", user_ids)
                 _exec_in("DELETE FROM coach_reviews WHERE user_id IN :ids", "ids", user_ids)
-                _exec_in("DELETE FROM User_login WHERE user_id IN :ids", "ids", user_ids)
-                _exec_in("DELETE FROM Users WHERE user_id IN :ids", "ids", user_ids)
+                _exec_in("DELETE FROM user_login WHERE user_id IN :ids", "ids", user_ids)
+                _exec_in("DELETE FROM users WHERE user_id IN :ids", "ids", user_ids)
 
                 db.session.commit()
             except Exception:
@@ -140,7 +140,7 @@ class TestAuthRoutes(unittest.TestCase):
         response = self.client.post("/auth/register", data=payload)
         data = response.get_json()
 
-        self.assertEqual(response.status_code, [201,500])
+        self.assertIn(response.status_code, [201,500])
         self.assertEqual(data["status"], "success")
 
     def test_register_coach_with_file(self):
@@ -161,7 +161,7 @@ class TestAuthRoutes(unittest.TestCase):
             "certificationFile_0": (BytesIO(b"dummy file content"), "cert.jpeg")
         }
         response = self.client.post("/auth/register", data=payload, content_type='multipart/form-data')
-        self.assertEqual(response.status_code, [201,500])
+        self.assertIn(response.status_code, [201,500])
 
     def test_register_missing_fields(self):
         payload = {"username": "incomplete_user"}

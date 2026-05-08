@@ -14,7 +14,7 @@ class TestAdminRoutes(unittest.TestCase):
         response = self.client.get("/admin/coach-applications")
         data = response.get_json()
         
-        self.assertEqual(response.status_code, [200,500])
+        self.assertIn(response.status_code, [200,500])
         self.assertIn("applications", data)
         self.assertIn("totalPages", data)
     
@@ -64,7 +64,7 @@ class TestAdminRoutes(unittest.TestCase):
         response = self.client.get("/admin/coach-reports")
         data = response.get_json()
         
-        self.assertEqual(response.status_code, [200,500])
+        self.assertIn(response.status_code, [200,500])
         self.assertIn("reports", data)
     
     def test_coach_report_details_success(self):
@@ -263,7 +263,7 @@ class TestAdminRoutes(unittest.TestCase):
             data = response.get_json()
             self.assertEqual(data["status"], "success")
     
-    # Admin - Users
+    # Admin - users
     def test_fetch_users(self):
         response = self.client.get("/admin/fetch-users")
         data = response.get_json()

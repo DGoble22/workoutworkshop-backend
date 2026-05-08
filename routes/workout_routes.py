@@ -233,15 +233,18 @@ def save_workout():
                                      VALUES (:plan_id, :exercise_id, :sets, :reps, :weight)
                                      """)
 
-        # Defaults sets, reps, weight to 0 if empty
-        for exercise in exercises:
-            db.session.execute(insert_exercise_query, {
-                "plan_id": plan_id,
-                "exercise_id": exercise['exercise_id'],
-                "sets": exercise.get('sets', 0),
-                "reps": exercise.get('reps', 0),
-                "weight": exercise.get('weight', 0)
-            })
+        # Bulk insert all exercises
+        exercise_data = [{
+            "plan_id": plan_id,
+            "exercise_id": ex['exercise_id'],
+            "sets": ex.get('sets', 0),
+            "reps": ex.get('reps', 0),
+            "weight": ex.get('weight', 0)
+        } for ex in exercises]
+
+        # Passes a list of dicts
+        if exercise_data:
+            db.session.execute(insert_exercise_query, exercise_data)
 
         db.session.commit()
 
@@ -275,18 +278,47 @@ def get_workout_log(user_id):
     db = current_app.extensions['sqlalchemy']
 
     try:
-        # Grab workouts, newest first
+        # One query to get plans and exercises in the log and join with exercise details.
         query = text("""
-                     SELECT plan_id as id, planned_date as date, title
-                     FROM workout_plans
-                     WHERE user_id = :user_id
-                     ORDER BY plan_id DESC
+                     SELECT wp.plan_id as id,
+                            wp.planned_date as date, wp.title,
+                       pe.exercise_id, e.name as exercise_name, pe.sets, pe.reps, pe.weight, pe.completed
+                     FROM workout_plans wp
+                         LEFT JOIN plan_exercise pe
+                     ON wp.plan_id = pe.plan_id
+                         LEFT JOIN exercises e ON pe.exercise_id = e.exercise_id
+                     WHERE wp.user_id = :user_id
+                     ORDER BY wp.plan_id DESC
                      """)
 
         result = db.session.execute(query, {"user_id": user_id}).mappings().fetchall()
 
-        # Convert result to list of dicts
-        workouts = [dict(row) for row in result]
+        # Group exercises by workout plan using a dictionary, then convert back to list for frontend
+        workouts_dict = {}
+        for row in result:
+            plan_id = row.get('id', row.get('plan_id'))
+
+            if plan_id not in workouts_dict:
+                workouts_dict[plan_id] = {
+                    'id': plan_id,
+                    'date': row.get('date', row.get('planned_date')),
+                    'title': row.get('title'),
+                    'exercises': []
+                }
+
+            # If this workout has exercises attached, append them to the list
+            if row.get('exercise_id'):
+                workouts_dict[plan_id]['exercises'].append({
+                    'exercise_id': row.get('exercise_id'),
+                    'exercise_name': row.get('exercise_name', row.get('name')),
+                    'sets': row.get('sets'),
+                    'reps': row.get('reps'),
+                    'weight': row.get('weight'),
+                    'completed': row.get('completed')
+                })
+
+        # Convert dictionary back to a list for the frontend
+        workouts = list(workouts_dict.values())
 
         return jsonify({'status': 'success', 'data': workouts}), 200
 
@@ -418,24 +450,26 @@ def update_workout_plan(plan_id):
     if not exercises:
         return jsonify({'status': 'error', 'message': 'No exercises provided for update'}), 400
     try:
-        # Loop through exercise and update each one in the plan_exercise table
-        for ex in exercises:
-            update_query = text("""
-                                UPDATE plan_exercise
-                                SET reps   = :reps,
-                                    `sets`   = :sets,
-                                    weight = :weight
-                                WHERE plan_id = :plan_id
-                                  AND exercise_id = :exercise_id
-                                """)
+        update_query = text("""
+                            UPDATE plan_exercise
+                            SET reps   = :reps,
+                                `sets` = :sets,
+                                weight = :weight
+                            WHERE plan_id = :plan_id
+                              AND exercise_id = :exercise_id
+                            """)
 
-            db.session.execute(update_query, {
-                "reps": ex.get('reps'),
-                "sets": ex.get('sets'),
-                "weight": ex.get('weight'),
-                "plan_id": plan_id,
-                "exercise_id": ex.get('exercise_id')
-            })
+        # Bulk Update using a list of dictionaries
+        update_data = [{
+            "reps": ex.get('reps'),
+            "sets": ex.get('sets'),
+            "weight": ex.get('weight'),
+            "plan_id": plan_id,
+            "exercise_id": ex.get('exercise_id')
+        } for ex in exercises]
+
+        if update_data:
+            db.session.execute(update_query, update_data)
 
         db.session.commit()
 
@@ -566,7 +600,7 @@ def remove_workout_from_log(plan_id):
 @workout_bp.route('/add-workout', methods=["POST"])
 def add_workout_to_plan():
     """
-    Must add a single exercise to the workout plan (creates for not exists)
+    Add one or multiple exercises to the workout plan (creates plan if it does not exist)
     ---
     tags:
       - Workout - Add Exercise
@@ -588,67 +622,79 @@ def add_workout_to_plan():
               type: integer
               example: 1
             exercise_id:
-              type: integer
-              example: 5
+              description: Accepts a single exercise ID or an array of IDs for bulk insertion.
+              type: array
+              items:
+                type: integer
+              example: [5, 8, 12]
     responses:
       200:
-        description: Get exercise added to the workout plan
+        description: Successfully added exercises to the workout plan
       400:
         description: Missing Fields
-      403:
-        description: Error in adding exercise
+      500:
+        description: Internal Server Error (Database Error)
     """
     payload = request.get_json(silent=True) or {}
 
     try:
         planned_date = payload.get("planned_date")
         user_id = payload.get("user_id")
-        exercise_id = payload.get("exercise_id")
+        exercise_data = payload.get("exercise_id")
 
-        if not all([planned_date, user_id, exercise_id]):
+        if not all([planned_date, user_id, exercise_data]):
             return jsonify({
                 'status': 'error',
-                'message': 'failed to recieve date or exercise_id or user_id'
+                'message': 'failed to receive date or exercise_id or user_id'
             }), 400
 
         db = current_app.extensions['sqlalchemy']
         session = db.session
 
-        # check if user has a plan already made for that date
-        query = text("""
-                     select *
-                     from workout_plans
-                     where user_id = :user_id
-                       and planned_date like :planned_date
-                    """)
+        if not isinstance(exercise_data, list):
+            exercise_ids = [exercise_data]
+        else:
+            exercise_ids = exercise_data
 
-        result = db.session.execute(query, {"user_id": user_id, "planned_date": planned_date}).mappings().fetchall()
-        if (len(result) > 0):
+        # Check if a workout plan already exists for the user on the given date
+        query = text("""
+                     SELECT plan_id
+                     FROM workout_plans
+                     WHERE user_id = :user_id
+                       AND planned_date LIKE :planned_date
+                     """)
+
+        result = session.execute(query, {"user_id": user_id, "planned_date": planned_date}).mappings().fetchall()
+
+        if len(result) > 0:
             plan_id = result[0]["plan_id"]
         else:
+            # Create the plan if it doesn't exist
             query = text("""
-                         insert into workout_plans (user_id, title, planned_date)
-                         values (:user_id, :title, :planned_date)
+                         INSERT INTO workout_plans (user_id, title, planned_date)
+                         VALUES (:user_id, :title, :planned_date)
                          """)
-            result = db.session.execute(query,
-                                        {"user_id": user_id, "title": planned_date, "planned_date": planned_date})
-            session.commit()
-            plan_id = result.lastrowid  # get the id of the new row
+            result = session.execute(query, {"user_id": user_id, "title": planned_date, "planned_date": planned_date})
+            plan_id = result.lastrowid
 
-        db.session.execute(
-            text("""
-                 insert into plan_exercise (plan_id, exercise_id)
-                 values (:plan_id, :exercise_id)
-                 """),
-            {"plan_id": plan_id, "exercise_id": exercise_id}
-        )
+        # Bulk all exercises together in one query to be more efficient
+        insert_query = text("""
+                            INSERT INTO plan_exercise (plan_id, exercise_id)
+                            VALUES (:plan_id, :exercise_id)
+                            """)
 
+        # Create a list of dictionaries for SQLAlchemy to execute in bulk
+        values_to_insert = [{"plan_id": plan_id, "exercise_id": eid} for eid in exercise_ids]
+
+        session.execute(insert_query, values_to_insert)
         session.commit()
-        return jsonify({"message": "Exercise Added"}), 200
+
+        return jsonify({"message": f"Successfully added {len(exercise_ids)} exercises"}), 200
 
     except Exception as e:
+        session.rollback()
         print("DATABASE ERROR:", str(e))
-        return jsonify({"message": "Error Adding Exercise"}), 403
+        return jsonify({"message": "Error Adding Exercise"}), 500
 
 
 # remove individual exercise from daily-workout plan

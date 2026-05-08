@@ -20,7 +20,7 @@ def get_coach_data():
     try:
         # Main Query to get coach data
         query = """SELECT c_p.coach_id, u_p.user_id, u_p.first_name, u_p.last_name, c_p.bio, c_p.is_nutritionist, c_p.is_active, c_p.pricing, u_p.profile_picture_url, AVG(c_r.rating) as rating FROM coach_profiles as c_p
-        JOIN user_profiles AS u_p ON c_p.user_ID = u_p.user_id
+        JOIN user_profiles AS u_p ON c_p.user_id = u_p.user_id
 		left JOIN coach_reviews AS c_r ON c_p.coach_id = c_r.coach_id 
         GROUP BY c_p.coach_id"""
         coaches = db.session.execute(db.text(query)).fetchall()
@@ -57,7 +57,7 @@ def get_single_coach_data(coach_id):
     try:
         # Main Query to get coach data
         query = """SELECT c_p.coach_id, u_p.user_id, u_p.first_name, u_p.last_name, c_p.bio, c_p.is_nutritionist, c_p.is_active, c_p.pricing, u_p.profile_picture_url, AVG(c_r.rating) as rating FROM coach_profiles as c_p
-        JOIN user_profiles AS u_p ON c_p.user_ID = u_p.user_id
+        JOIN user_profiles AS u_p ON c_p.user_id = u_p.user_id
 		left JOIN coach_reviews AS c_r ON c_p.coach_id = c_r.coach_id 
         WHERE c_p.coach_id = :coach_id
         GROUP BY c_p.coach_id"""
@@ -271,7 +271,7 @@ def send_user_coach_app():
 
         session.execute(
             text(
-                'insert into Coach_requests (user_id, coach_id, comment) values (:user_id, :coach_id, :comment)'
+                'insert into coach_requests (user_id, coach_id, comment) values (:user_id, :coach_id, :comment)'
             ),
                 {'user_id': user_id, 'coach_id': coach_id, 'comment': comment}
         )
@@ -331,7 +331,7 @@ def send_coach_report():
 
         session.execute(
             text(
-                'insert into Coach_reports (reporter_id, coach_id, reason) values (:reporter_id, :coach_id, :message)'
+                'insert into coach_reviews (reporter_id, coach_id, reason) values (:reporter_id, :coach_id, :message)'
             ),
                 {'reporter_id': reporter_id, 'coach_id': coach_id, 'message': message}
         )

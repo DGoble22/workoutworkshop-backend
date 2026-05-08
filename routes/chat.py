@@ -47,7 +47,7 @@ def register_chat_events(socketio, app):
         db = current_app.extensions['sqlalchemy']
         try:
             # First, get the role of the current user
-            role_sql = text("SELECT role FROM Users WHERE user_id = :uid")
+            role_sql = text("SELECT role FROM users WHERE user_id = :uid")
             user_role = db.session.execute(role_sql, {"uid": user_id}).scalar()
             contacts = []
 
@@ -55,8 +55,8 @@ def register_chat_events(socketio, app):
             if user_role == 'U':
                 query = text("""
                     SELECT u.user_id, up.first_name, up.last_name, u.role
-                    FROM Users u
-                    JOIN User_Profiles up ON u.user_id = up.user_id
+                    FROM users u
+                    JOIN user_profiles up ON u.user_id = up.user_id
                     JOIN coach_profiles cp ON u.user_id = cp.user_id
                     JOIN coach_subscriptions cs ON cp.coach_id = cs.coach_id
                     WHERE cs.user_id = :uid
@@ -67,8 +67,8 @@ def register_chat_events(socketio, app):
             elif user_role == 'C':
                 query = text("""
                     SELECT u.user_id, up.first_name, up.last_name, u.role
-                    FROM Users u
-                    JOIN User_Profiles up ON u.user_id = up.user_id
+                    FROM users u
+                    JOIN user_profiles up ON u.user_id = up.user_id
                     JOIN coach_subscriptions cs ON u.user_id = cs.user_id
                     JOIN coach_profiles cp ON cs.coach_id = cp.coach_id
                     WHERE cp.user_id = :uid
@@ -79,8 +79,8 @@ def register_chat_events(socketio, app):
             else:
                 query = text("""
                     SELECT u.user_id, up.first_name, up.last_name, u.role
-                    FROM Users u
-                    JOIN User_Profiles up ON u.user_id = up.user_id
+                    FROM users u
+                    JOIN user_profiles up ON u.user_id = up.user_id
                     WHERE u.user_id != :uid
                 """)
                 results = db.session.execute(query, {"uid": user_id}).mappings().all()
