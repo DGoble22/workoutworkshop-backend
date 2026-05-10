@@ -331,7 +331,7 @@ def send_coach_report():
 
         session.execute(
             text(
-                'insert into coach_reviews (reporter_id, coach_id, reason) values (:reporter_id, :coach_id, :message)'
+                'insert into coach_reports (reporter_id, coach_id, reason) values (:reporter_id, :coach_id, :message)'
             ),
                 {'reporter_id': reporter_id, 'coach_id': coach_id, 'message': message}
         )
