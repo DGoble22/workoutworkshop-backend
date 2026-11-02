@@ -1,89 +1,62 @@
-# Group Project
+# Workout Workshop API
 
-## Description
-This is a Flask-based web application that uses SQLAlchemy for database management. The project includes multiple routes and blueprints for modularity and scalability.
+Flask API for [Workout Workshop](https://github.com/DGoble22/workoutworkshop-frontend), a group-built fitness platform. It covers accounts, workouts, coaches, and chat.
 
-## Features
-- **Flask Framework**: Backend development.
-- **SQLAlchemy**: Database ORM for managing MySQL.
-- **Flask-CORS**: Cross-Origin Resource Sharing support.
-- **Blueprints**: Modular route organization.
+## What it does
 
-## Prerequisites
-- Python 3.10+
-- MySQL installed and running locally.
-- `pip` for managing Python packages.
+- Registers users and coaches, checks usernames, and issues JWTs.
+- Stores an exercise library and a weekly workout plan. Users can log sets, mark exercises complete, and read weekly stats.
+- Lets a user apply to a coach, and lets that coach accept or decline. Coaches keep a client list, a profile, availability, and meal plans.
+- Collects coach reviews and reports. Admins approve certifications, dismiss or act on reports, and edit the exercise list.
+- Tracks goals, payment details, weight, calories, daily check-ins, and progress photos.
+- Sends chat over Socket.IO, with history available over HTTP.
+- Publishes API docs through Flasgger.
 
-## Setup Instructions
+## Stack
 
-### 1. Clone the Repository
+Python, Flask, Flask-SQLAlchemy, PyMySQL, Flask-SocketIO, PyJWT, and Flasgger. GitHub Actions runs the test suite on pushes to `main`, then calls a deploy webhook.
+
+## Run it locally
+
 ```bash
-git clone <repository-url>
-cd project
-
-### 2. Create a Virtual Environment
-```bash
-python -m venv venv
-
-### 3. Activate the Virtual Environment
-- On Windows:
-```bash
-venv\Scripts\activate
-```
-- On macOS/Linux:
-```bash
+python3 -m venv venv
 source venv/bin/activate
-```
-### 4. Install Dependencies
-```bash
 pip install -r requirements.txt
 ```
-### 5. Configure Database
-Make sure MySQL is running and create a database named `Group_Project`. Update the database URI in `app.py` if necessary.
-If you don't have the DB running you need to first run the create tables script and all of the mock data scripts within DBeaver or MYSQLWorkbench
-Create a .env file in the root directory of the project and add the following line, replacing the values with your MySQL credentials:
-```
-DB_USER=root
+
+Export the database and auth settings before starting the server:
+
+```bash
+DB_HOST=
+DB_PORT=3306
+DB_USER=
 DB_PASSWORD=
-DB_HOST=localhost
-DB_NAME=defaultdb
+DB_NAME=
+JWT_SECRET=
 ```
 
-### 6. Run the Application
+Table definitions and seed data are in `SQL/`.
+
 ```bash
 python app.py
 ```
-### 7. Access the Application
-Open your web browser and navigate to `http://localhost:5000` to access the application.
 
-### 8. Test DB Connection
-You can test the database connection by navigating to `http://localhost:5000/test-db` in your web browser. This route will attempt to connect to the MySQL database and return a success message if the connection is successful.
+## API groups
 
-## Team Workflow
+| Prefix | Purpose |
+| --- | --- |
+| `/auth` | Register, login, change password |
+| `/user` | Profile, goals, progress, surveys, chat history |
+| `/coach` | Coach profiles, requests, clients, meal plans, reviews |
+| `/api/workouts` | Exercise library, plans, logs, weekly stats |
+| `/admin` | Applications, reports, exercises, users |
 
-### Working on Features
+## Tests
 
-1. **Always pull latest changes before starting work:**
-   ```bash
-   git pull origin main
-   ```
+The CI job runs:
 
-2. **Create a new branch for your feature:**
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
+```bash
+coverage run -m unittest discover -p "*_tests.py" tests
+```
 
-3. **Make your changes and test them**
-
-4. **Commit with clear messages:**
-   ```bash
-   git add .
-   git commit -m "Add workout builder form component"
-   ```
-
-5. **Push your branch:**
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-6. **Create a Pull Request** for team review
+See `tests/HOWTORUN.md` for local test notes.
